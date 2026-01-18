@@ -34,8 +34,18 @@ export const defaultConfig: AAXConfig = {
   preferEmbeddedChapterTimes: true,
 }
 
-// eslint-disable-next-line antfu/no-top-level-await
-export const config: AAXConfig = await loadConfig({
+// Lazy-loaded config to avoid top-level await (enables bun --compile)
+let _config: AAXConfig | null = null
+
+export async function getConfig(): Promise<AAXConfig> {
+  if (!_config) {
+    _config = await loadConfig({
   name: 'aax',
   defaultConfig,
 })
+  }
+  return _config
+}
+
+// For backwards compatibility - synchronous access with default fallback
+export const config: AAXConfig = defaultConfig
