@@ -1,26 +1,39 @@
 import type { ConversionOptions, ConversionResult } from './types'
 import { existsSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
+import { FileTarget } from 'ts-videos/target'
+import { Reader } from 'ts-videos/reader'
+import { Mp4Muxer } from '@ts-videos/mp4/muxer'
+import { parseAaxFile } from './aax-parser'
+import { decryptSample, deriveKeys, parseActivationBytes, validateActivationBytes } from './aax-decryptor'
 import { config } from './config'
 import { getActivationBytesFromAudibleCli } from './utils/activation'
-import { checkFFmpeg, runFFmpeg } from './utils/ffmpeg'
 import { logger, reportError } from './utils/logger'
 import { getBookMetadata } from './utils/metadata'
 
+/** Sanitize a string for use as a filename or directory name on macOS/Windows/Linux */
+function sanitizeName(name: string): string {
+  return name
+    .replace(/:/g, ' -')
+    .replace(/[/\\?*"<>|]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 function generateOutputPath(metadata: any, options: ConversionOptions): string {
   const outputDir = options.outputDir || config.outputDir || '.'
-  const outputFormat = options.outputFormat || config.outputFormat || 'mp3'
+  const outputFormat = options.outputFormat || config.outputFormat || 'm4b'
 
   let basePath = outputDir
 
   // Handle folder structure
   if (!options.flatFolderStructure) {
     if (metadata.author) {
-      basePath = path.join(basePath, metadata.author)
+      basePath = path.join(basePath, sanitizeName(metadata.author))
     }
 
     if (options.seriesTitleInFolderStructure && metadata.series) {
-      basePath = path.join(basePath, metadata.series)
+      basePath = path.join(basePath, sanitizeName(metadata.series))
     }
 
     const bookFolder = options.fullCaptionForBookFolder
@@ -28,7 +41,7 @@ function generateOutputPath(metadata: any, options: ConversionOptions): string {
       : metadata.title?.split(':')[0]
 
     if (bookFolder) {
-      basePath = path.join(basePath, bookFolder)
+      basePath = path.join(basePath, sanitizeName(bookFolder))
     }
   }
 
@@ -37,6 +50,7 @@ function generateOutputPath(metadata: any, options: ConversionOptions): string {
 
   // Generate filename
   let filename = metadata.title || path.basename(options.inputFile, path.extname(options.inputFile))
+  filename = sanitizeName(filename)
 
   // Add part number if available
   if (metadata.seriesIndex && options.sequenceNumberDigits) {
@@ -48,7 +62,7 @@ function generateOutputPath(metadata: any, options: ConversionOptions): string {
 }
 
 /**
- * Convert an AAX file to the specified format
+ * Convert an AAX file to M4B (decrypted AAC passthrough)
  */
 export async function convertAAX(options: ConversionOptions): Promise<ConversionResult> {
   // Validate input file
@@ -68,26 +82,6 @@ export async function convertAAX(options: ConversionOptions): Promise<Conversion
     }
   }
 
-  // Check for ffmpeg
-  const ffmpegAvailable = await checkFFmpeg()
-  if (!ffmpegAvailable) {
-    reportError(new Error('FFmpeg is not available'), {
-      heading: 'FFmpeg not found. Required for conversion.',
-      details: 'The converter requires FFmpeg to decrypt and transcode AAX files.',
-      hints: [
-        'Install on macOS: brew install ffmpeg',
-        'Install on Linux: use your package manager (e.g., apt install ffmpeg)',
-        'Install on Windows: https://ffmpeg.org/download.html',
-        'Alternatively set ffmpegPath in aax.config.ts to your ffmpeg binary',
-      ],
-    })
-    return {
-      success: false,
-      error: 'FFmpeg not found. Required for conversion.',
-    }
-  }
-  logger.info('Checking FFmpeg installation...')
-
   // Get activation code
   const activationCode = options.activationCode || config.activationCode || await getActivationBytesFromAudibleCli()
 
@@ -98,7 +92,7 @@ export async function convertAAX(options: ConversionOptions): Promise<Conversion
       hints: [
         'Provide activationCode in options or in aax.config.ts',
         'Use Audible CLI to fetch: audible activation-bytes (run audible quickstart first)',
-        'Try environment overrides and run again with AAX_LOG_LEVEL=debug for more output',
+        'Try environment overrides and run with AAX_LOG_LEVEL=debug for more output',
       ],
     })
     return {
@@ -110,155 +104,210 @@ export async function convertAAX(options: ConversionOptions): Promise<Conversion
   logger.info(`Using activation code: ${activationCode.substring(0, 2)}******`)
 
   try {
-    // Get book metadata
-    logger.info('Retrieving audiobook metadata...')
+    // Parse the AAX file
+    logger.info('Parsing AAX file structure...')
+    const aaxInfo = await parseAaxFile(options.inputFile)
 
-    // Get metadata (use getBookMetadata which will internally call extractAAXMetadata)
-    const metadata = await getBookMetadata(options.inputFile)
-    const outputPath = generateOutputPath(metadata, options)
-
-    // Log book info
-    if (metadata.title) {
-      logger.info(`Title: ${metadata.title}`)
-    }
-    if (metadata.author) {
-      logger.info(`Author: ${metadata.author}`)
-    }
-    if (metadata.narrator) {
-      logger.info(`Narrator: ${metadata.narrator}`)
-    }
+    // Log book info from parsed metadata
+    const metadata = aaxInfo.metadata
+    if (metadata.title) logger.info(`Title: ${metadata.title}`)
+    if (metadata.author) logger.info(`Author: ${metadata.author}`)
+    if (metadata.narrator) logger.info(`Narrator: ${metadata.narrator}`)
     if (metadata.duration) {
       const hours = Math.floor(metadata.duration / 3600)
       const minutes = Math.floor((metadata.duration % 3600) / 60)
       const seconds = Math.floor(metadata.duration % 60)
       logger.info(`Duration: ${hours}h ${minutes}m ${seconds}s`)
     }
-    if (metadata.chapters?.length) {
-      logger.info(`Chapters: ${metadata.chapters.length}`)
+    if (aaxInfo.chapters.length) {
+      logger.info(`Chapters: ${aaxInfo.chapters.length}`)
     }
 
-    // Avoid duplicate logs by using logger.debug for detailed path info
-    logger.info(`Output format: ${options.outputFormat || config.outputFormat || 'mp3'}`)
-
-    // Only log the base output path once, more detailed path info in debug
-    const shortPath = path.basename(outputPath)
-    logger.info(`Output path: ${shortPath}`)
-    logger.debug(`Full output path: ${outputPath}`)
-
-    // Build FFmpeg command
-    logger.info('Preparing FFmpeg command...')
-    const ffmpegArgs: string[] = []
-
-    // Input file
-    ffmpegArgs.push('-activation_bytes', activationCode)
-    ffmpegArgs.push('-i', options.inputFile)
-
-    // Audio stream selection
-    ffmpegArgs.push('-map', '0:0')
-
-    // Audio quality settings
-    if (options.variableBitRate) {
-      ffmpegArgs.push('-q:a', '0')
+    // Derive decryption keys
+    logger.info('Deriving decryption keys...')
+    let activationBytes: Uint8Array
+    try {
+      activationBytes = parseActivationBytes(activationCode)
     }
-    else {
-      const bitrate = options.bitrate || config.bitrate || 64
-      ffmpegArgs.push('-ab', `${bitrate}k`)
-    }
-
-    // Metadata
-    ffmpegArgs.push('-map_metadata', '0')
-
-    // Handle chapters
-    if (options.chaptersEnabled) {
-      if (options.useNamedChapters) {
-        ffmpegArgs.push('-map_chapters', '0')
-      }
-    }
-
-    // Format specific settings
-    const outputFormat = options.outputFormat || config.outputFormat || 'mp3'
-    if (outputFormat === 'mp3') {
-      ffmpegArgs.push('-codec:a', 'libmp3lame')
-      ffmpegArgs.push('-write_xing', '0')
-      ffmpegArgs.push('-id3v2_version', '3')
-
-      if (options.useISOLatin1) {
-        ffmpegArgs.push('-id3v2_version', '3')
-        ffmpegArgs.push('-metadata_header_padding', '0')
-        ffmpegArgs.push('-write_id3v1', '1')
-      }
-    }
-    else if (outputFormat === 'm4a' || outputFormat === 'm4b') {
-      ffmpegArgs.push('-codec:a', 'aac')
-      ffmpegArgs.push('-f', 'mp4')
-      ffmpegArgs.push('-movflags', '+faststart')
-      ffmpegArgs.push('-metadata:s:a:0', 'handler=Sound')
-
-      if (options.aacEncoding44_1) {
-        ffmpegArgs.push('-ar', '44100')
-      }
-    }
-
-    // Extract cover image if requested
-    if (options.extractCoverImage) {
-      const coverPath = path.join(path.dirname(outputPath), 'cover.jpg')
-      ffmpegArgs.push('-map', '0:v')
-      ffmpegArgs.push('-c:v', 'copy')
-      ffmpegArgs.push(coverPath)
-    }
-
-    // Output file
-    ffmpegArgs.push('-y')
-    ffmpegArgs.push(outputPath)
-
-    // Log command for debugging
-    if (config.verbose) {
-      logger.debug(`FFmpeg command: ffmpeg ${ffmpegArgs.join(' ')}`)
-    }
-
-    // Run FFmpeg
-    logger.info('Starting conversion...')
-    const { success, output } = await runFFmpeg(ffmpegArgs)
-
-    if (success) {
-      logger.success(`Conversion completed! Output saved to: ${outputPath}`)
+    catch (e) {
       return {
-        success: true,
-        outputPath,
+        success: false,
+        error: `Invalid activation code format: ${(e as Error).message}`,
       }
     }
-    else {
-      // Try with lowercase activation code
-      logger.warn('First conversion attempt failed, trying with lowercase activation code...')
-      ffmpegArgs[1] = activationCode.toLowerCase()
 
-      if (config.verbose) {
-        logger.debug(`FFmpeg command (with lowercase code): ffmpeg ${ffmpegArgs.join(' ')}`)
-      }
-
-      const retryResult = await runFFmpeg(ffmpegArgs)
-
-      if (retryResult.success) {
-        logger.success(`Conversion completed! Output saved to: ${outputPath}`)
-        return {
-          success: true,
-          outputPath,
+    // Validate the activation bytes
+    const isValid = validateActivationBytes(aaxInfo.adrmContent, activationBytes)
+    if (!isValid) {
+      // Try lowercase
+      try {
+        const lowerBytes = parseActivationBytes(activationCode.toLowerCase())
+        const isValidLower = validateActivationBytes(aaxInfo.adrmContent, lowerBytes)
+        if (isValidLower) {
+          activationBytes = lowerBytes
+          logger.debug('Lowercase activation code validated successfully')
+        }
+        else {
+          reportError(new Error('Invalid activation code'), {
+            heading: 'Activation code validation failed.',
+            details: 'The provided activation code does not match this AAX file\'s DRM.',
+            hints: [
+              'Verify the activation code is correct',
+              'Try a different activation code',
+              'Use `aax setup-audible` to fetch your activation bytes',
+            ],
+          })
+          return {
+            success: false,
+            error: 'Activation code does not match this AAX file',
+          }
         }
       }
+      catch {
+        return {
+          success: false,
+          error: 'Activation code does not match this AAX file',
+        }
+      }
+    }
 
-      reportError(new Error('Conversion failed'), {
-        heading: 'Conversion failed.',
-        details: 'FFmpeg returned a non-zero exit code.',
+    const keys = deriveKeys(aaxInfo.adrmContent, activationBytes)
+    logger.info('Decryption keys derived successfully')
+
+    // Determine output format and path
+    const outputFormat = options.outputFormat || config.outputFormat || 'm4b'
+    if (outputFormat as string === 'mp3') {
+      reportError(new Error('MP3 output not supported'), {
+        heading: 'MP3 output is not currently supported.',
+        details: 'AAC-to-MP3 transcoding requires an audio decoder/encoder pipeline that is not yet available.',
         hints: [
-          'Verify the activation code is correct (case sensitive)',
-          'Try running with AAX_LOG_LEVEL=debug to see the FFmpeg command and output',
-          'Ensure input file is a valid AAX and not corrupted',
+          'Use m4b or m4a format instead (no transcoding needed, just decryption)',
+          'Set outputFormat: "m4b" in aax.config.ts',
         ],
       })
       return {
         success: false,
-        error: `FFmpeg conversion failed: ${output}`,
+        error: 'MP3 output is not currently supported. Use m4b or m4a format.',
       }
+    }
+
+    const outputPath = generateOutputPath(metadata, options)
+    const shortPath = path.basename(outputPath)
+    logger.info(`Output format: ${outputFormat}`)
+    logger.info(`Output path: ${shortPath}`)
+    logger.debug(`Full output path: ${outputPath}`)
+
+    // Create output M4B using ts-videos Mp4Muxer
+    logger.info('Starting conversion...')
+    const target = new FileTarget(outputPath)
+    const muxer = new Mp4Muxer(target, {
+      fastStart: true, // moov-before-mdat for maximum compatibility
+      brand: 'M4B ',
+    })
+
+    // Add audio track with AAC config from the original file
+    const audioTrack = muxer.addAudioTrack({
+      codec: 'aac',
+      sampleRate: aaxInfo.sampleRate,
+      channels: aaxInfo.channelCount,
+      codecDescription: aaxInfo.esdsConfig,
+    })
+
+    // Set metadata for the output file
+    muxer.setMetadata({
+      title: metadata.title,
+      artist: metadata.author,
+      albumArtist: metadata.narrator,
+      album: metadata.title,
+      genre: 'Audiobook',
+      year: metadata.publishingYear ? Number(metadata.publishingYear) : undefined,
+      copyright: metadata.copyright,
+      narrator: metadata.narrator,
+      publisher: metadata.publisher,
+      description: metadata.description,
+    })
+
+    // Set cover art
+    if (metadata.coverImage) {
+      const isJpeg = metadata.coverImage[0] === 0xFF && metadata.coverImage[1] === 0xD8
+      muxer.setArtwork(metadata.coverImage, isJpeg ? 'jpeg' : 'png')
+    }
+
+    // Add chapters
+    for (const chapter of aaxInfo.chapters) {
+      muxer.addChapter(chapter.title, chapter.startTime * 1000)
+    }
+
+    await muxer.start()
+
+    // Create a reader source to read encrypted samples
+    const reader = new Reader(aaxInfo.source) as Reader & { position: number }
+    const totalSamples = aaxInfo.samples.length
+    let processedSamples = 0
+    let timestamp = 0 // Running timestamp in seconds
+
+    // Set up progress bar
+    const progressBar = logger.progress(100, 'Decrypting and remuxing...')
+
+    for (const sample of aaxInfo.samples) {
+      // Read encrypted sample data from source
+      reader.position = sample.offset
+      const encrypted = await reader.readBytes(sample.size)
+      if (!encrypted) {
+        logger.warn(`Failed to read sample at offset ${sample.offset}, skipping`)
+        continue
+      }
+
+      // Decrypt the sample
+      const decrypted = decryptSample(encrypted, keys.fileKey, keys.fileIv)
+
+      // Calculate duration in seconds
+      const durationSec = sample.duration / aaxInfo.timescale
+
+      // Write decrypted sample to muxer
+      await muxer.writePacket(audioTrack.id, {
+        data: decrypted,
+        timestamp,
+        duration: durationSec,
+        isKeyframe: true,
+      })
+
+      timestamp += durationSec
+      processedSamples++
+
+      // Update progress
+      if (processedSamples % 1000 === 0 || processedSamples === totalSamples) {
+        const percent = Math.min(99, (processedSamples / totalSamples) * 100)
+        const timeStr = formatDuration(timestamp)
+        const totalStr = formatDuration(aaxInfo.duration / aaxInfo.timescale)
+        progressBar.update(percent, `Decrypting ${timeStr} / ${totalStr} (${processedSamples}/${totalSamples} samples)`)
+      }
+    }
+
+    // Finalize the muxer (writes moov + closes file)
+    await muxer.finalize()
+    await target.close?.()
+    await aaxInfo.source.close?.()
+
+    progressBar.update(100, 'Conversion complete')
+
+    // Extract cover image if requested
+    if (options.extractCoverImage && metadata.coverImage) {
+      const coverPath = path.join(path.dirname(outputPath), 'cover.jpg')
+      try {
+        const { writeFileSync } = await import('node:fs')
+        writeFileSync(coverPath, metadata.coverImage)
+        logger.info(`Cover art saved to: ${path.basename(coverPath)}`)
+      }
+      catch (e) {
+        logger.warn(`Failed to save cover art: ${(e as Error).message}`)
+      }
+    }
+
+    logger.success(`Conversion completed! Output saved to: ${outputPath}`)
+    return {
+      success: true,
+      outputPath,
     }
   }
   catch (error) {
@@ -282,4 +331,11 @@ export async function splitToChapters(options: ConversionOptions): Promise<Conve
   logger.info('Converting and splitting audiobook by chapters...')
   const chaptersEnabled = true
   return convertAAX({ ...options, chaptersEnabled })
+}
+
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
 }

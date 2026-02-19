@@ -8,13 +8,14 @@ import { join } from 'node:path'
 import process from 'node:process'
 import { convertAAX } from '../src/converter'
 import {
+  extractActivationFromFile,
   getActivationBytesFromAudibleCli,
   getActivationCodeForFile,
   saveActivationCode,
 } from '../src/utils/activation'
 
 // Set up paths
-const FIXTURE_PATH = join(process.cwd(), 'test/fixtures/mock.aax')
+const FIXTURE_PATH = join(process.cwd(), 'test/fixtures/TheBookofLongingsANovel_ep7.aax')
 const OUTPUT_DIR = join(process.cwd(), 'test/output')
 
 // Ensure output directory exists
@@ -27,26 +28,26 @@ if (!existsSync(OUTPUT_DIR)) {
  * Get a valid activation code through various methods
  */
 async function getActivationCode(): Promise<string> {
-  console.warn('🔑 Attempting to automatically find activation code...')
+  console.warn('Attempting to automatically find activation code...')
 
   // First try to use the Audible CLI integration
-  console.warn('Checking for Audible CLI in project root...')
   const audibleCliCode = getActivationBytesFromAudibleCli()
   if (audibleCliCode) {
-    console.warn(`✅ Found activation code from Audible CLI: ${audibleCliCode.substring(0, 2)}******`)
+    console.warn(`Found activation code from Audible CLI: ${audibleCliCode.substring(0, 2)}******`)
     saveActivationCode(audibleCliCode)
     return audibleCliCode
   }
 
-  // Then try automatic extraction methods
+  // Then try automatic extraction methods (tries known codes against the file)
   const autoCode = await getActivationCodeForFile(FIXTURE_PATH)
   if (autoCode) {
     saveActivationCode(autoCode)
     return autoCode
   }
 
-  // For testing purposes, return a mock activation code
-  return 'TEST1234'
+  // Fallback to a known test code
+  console.warn('No automatic method found, using known test activation code')
+  return '1CEB00DA'
 }
 
 async function main() {
@@ -56,7 +57,7 @@ async function main() {
 
   // Check if input file exists
   if (!existsSync(FIXTURE_PATH)) {
-    console.error(`❌ Input file does not exist: ${FIXTURE_PATH}`)
+    console.error(`Input file does not exist: ${FIXTURE_PATH}`)
     process.exit(1)
   }
 
@@ -68,10 +69,10 @@ async function main() {
     const options: ConversionOptions = {
       inputFile: FIXTURE_PATH,
       outputDir: OUTPUT_DIR,
-      outputFormat: 'mp3' as const,
+      outputFormat: 'm4b',
       activationCode,
-      bitrate: 128,
       chaptersEnabled: true,
+      extractCoverImage: true,
     }
 
     console.warn(`Output format: ${options.outputFormat}`)
@@ -80,16 +81,16 @@ async function main() {
     const result = await convertAAX(options)
 
     if (result.success) {
-      console.warn(`✅ Conversion successful!`)
+      console.warn(`Conversion successful!`)
       console.warn(`Output file: ${result.outputPath}`)
     }
     else {
-      console.error(`❌ Conversion failed: ${result.error}`)
+      console.error(`Conversion failed: ${result.error}`)
       process.exit(1)
     }
   }
   catch (error: unknown) {
-    console.error(`❌ Unhandled error during conversion:`, error)
+    console.error(`Unhandled error during conversion:`, error)
     process.exit(1)
   }
 }

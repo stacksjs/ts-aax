@@ -13,7 +13,7 @@
   "bugs": {
     "url": "https://github.com/stacksjs/aax/issues"
   },
-  "keywords": ["aax", "converter", "audio", "book", "audiobook", "convert", "ffmpeg", "typescript", "bun"],
+  "keywords": ["aax", "converter", "audio", "book", "audiobook", "convert", "typescript", "bun"],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -58,6 +58,10 @@
     "zip:windows-x64": "zip -j bin/aax-windows-x64.zip bin/aax-windows-x64.exe",
     "zip:darwin-x64": "zip -j bin/aax-darwin-x64.zip bin/aax-darwin-x64",
     "zip:darwin-arm64": "zip -j bin/aax-darwin-arm64.zip bin/aax-darwin-arm64"
+  },
+  "dependencies": {
+    "ts-videos": "link:ts-videos",
+    "@ts-videos/mp4": "link:@ts-videos/mp4"
   },
   "devDependencies": {
     "better-dx": "^0.2.5"

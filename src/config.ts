@@ -4,7 +4,7 @@ import { findActivationCode } from './utils/activation'
 
 export const defaultConfig: AAXConfig = {
   verbose: true,
-  outputFormat: 'mp3',
+  outputFormat: 'm4b',
   outputDir: './converted',
   chaptersEnabled: true,
   bitrate: 128,
@@ -24,7 +24,7 @@ export const defaultConfig: AAXConfig = {
   aacEncoding44_1: false,
   variableBitRate: false,
   reduceBitRate: 'no',
-  fileType: 'm4a',
+  fileType: 'm4b',
   useISOLatin1: false,
   extractCoverImage: true,
 

@@ -1,80 +1,88 @@
 #!/usr/bin/env bun
 /**
  * This is a test script to extract activation codes from AAX files.
- * It tries multiple formats and approaches to find the right code.
+ * It tries multiple approaches to find the right activation code.
  */
 
-import { execSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { parseAaxFile } from '../src/aax-parser'
+import { parseActivationBytes, validateActivationBytes } from '../src/aax-decryptor'
 import { extractAaxChecksum, extractActivationFromFile } from '../src/utils/activation'
 
-// Get AAX file path from command line argument or use mock file
-const aaxFilePath = process.argv[2] || path.join(process.cwd(), 'test/fixtures/mock.aax')
+// Get AAX file path from command line argument or use the real fixture
+const aaxFilePath = process.argv[2] || path.join(process.cwd(), 'test/fixtures/TheBookofLongingsANovel_ep7.aax')
 
 if (!existsSync(aaxFilePath)) {
   console.error('Please provide a valid AAX file path')
   process.exit(1)
 }
 
-console.warn(`\n🔍 Testing activation code extraction for: ${path.basename(aaxFilePath)}`)
+console.warn(`\nTesting activation code extraction for: ${path.basename(aaxFilePath)}`)
 
-// Extract checksum
-const checksum = extractAaxChecksum(aaxFilePath)
-if (checksum) {
-  console.warn(`\n✅ Extracted checksum: ${checksum}`)
-  console.warn(`   First 8 chars: ${checksum.substring(0, 8)}`)
-  console.warn(`   First 8 chars (uppercase): ${checksum.substring(0, 8).toUpperCase()}`)
-}
+async function main() {
+  // Parse the AAX file to get adrm info
+  console.warn('\nParsing AAX file...')
+  const info = await parseAaxFile(aaxFilePath)
+  await info.source.close?.()
 
-// Try all known codes using our brute-force method
-console.warn('\n🔄 Testing all known activation codes...')
-const activationCode = extractActivationFromFile(aaxFilePath)
-
-if (activationCode) {
-  console.warn(`\n🎉 Found working activation code: ${activationCode}`)
-
-  // Verify with a simple FFmpeg command
-  try {
-    console.warn('\n🔍 Verifying code with FFmpeg...')
-    const cmd = `ffmpeg -activation_bytes ${activationCode} -i "${aaxFilePath}" -f null -t 1 -`
-    execSync(cmd, { stdio: 'inherit' })
-    console.warn('\n✅ Activation code verified successfully!')
+  console.warn(`  Sample rate: ${info.sampleRate}`)
+  console.warn(`  Channels: ${info.channelCount}`)
+  console.warn(`  Samples: ${info.samples.length}`)
+  console.warn(`  Duration: ${(info.duration / info.timescale).toFixed(1)}s`)
+  if (info.chapters.length > 0) {
+    console.warn(`  Chapters: ${info.chapters.length}`)
   }
-  catch (error) {
-    console.error('\n❌ Verification failed:', error)
+  if (info.metadata.title) {
+    console.warn(`  Title: ${info.metadata.title}`)
   }
-}
-else {
-  console.warn('\n❌ No working activation code found')
 
-  // Try some hardcoded codes as a last resort
-  const lastResortCodes = [
-    '1CEB00DA',
-    '4F087621',
-    '7B95D5DA',
-    'A9EDBB73',
-    '9A1DC7AE',
-    checksum?.substring(0, 8) || '',
-    checksum?.substring(0, 8).toUpperCase() || '',
-  ]
+  // Extract checksum
+  const checksum = await extractAaxChecksum(aaxFilePath)
+  if (checksum) {
+    console.warn(`\nExtracted checksum: ${checksum}`)
+  }
 
-  console.warn('\n🔄 Trying last resort codes with direct FFmpeg test:')
+  // Try all known codes
+  console.warn('\nTesting known activation codes...')
+  const knownCodes = ['1CEB00DA', '4F087621', '7B95D5DA', 'A9EDBB73', '9A1DC7AE']
 
-  for (const code of lastResortCodes) {
-    if (!code)
-      continue
-
+  for (const code of knownCodes) {
     try {
-      console.warn(`\nTesting code: ${code}`)
-      const cmd = `ffmpeg -activation_bytes ${code} -i "${aaxFilePath}" -f null -t 1 -`
-      execSync(cmd, { stdio: 'inherit' })
-      console.warn(`\n✅ Success with code: ${code}`)
-      process.exit(0)
+      const bytes = parseActivationBytes(code)
+      const isValid = validateActivationBytes(info.adrmContent, bytes)
+      console.warn(`  ${code}: ${isValid ? 'VALID' : 'invalid'}`)
+
+      if (isValid) {
+        console.warn(`\nFound working activation code: ${code}`)
+        return
+      }
     }
-    catch {
-      console.warn(`❌ Code ${code} failed`)
+    catch (error) {
+      console.warn(`  ${code}: error - ${(error as Error).message}`)
     }
   }
+
+  // Try lowercase variants
+  for (const code of knownCodes) {
+    const lower = code.toLowerCase()
+    try {
+      const bytes = parseActivationBytes(lower)
+      const isValid = validateActivationBytes(info.adrmContent, bytes)
+      console.warn(`  ${lower}: ${isValid ? 'VALID' : 'invalid'}`)
+
+      if (isValid) {
+        console.warn(`\nFound working activation code: ${lower}`)
+        return
+      }
+    }
+    catch (error) {
+      console.warn(`  ${lower}: error - ${(error as Error).message}`)
+    }
+  }
+
+  console.warn('\nNo working activation code found among known codes')
 }
+
+main().catch(console.error)

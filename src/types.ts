@@ -3,10 +3,9 @@ import type { Buffer } from 'node:buffer'
 export interface AAXConfig {
   verbose: boolean
   outputDir?: string
-  outputFormat?: 'mp3' | 'm4a' | 'm4b'
+  outputFormat?: 'm4a' | 'm4b'
   chaptersEnabled?: boolean
   bitrate?: number | 'source'
-  ffmpegPath?: string
   activationCode?: string
 
   // Folder structure options
