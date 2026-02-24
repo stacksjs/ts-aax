@@ -64,7 +64,7 @@
     "@ts-videos/mp4": "link:@ts-videos/mp4"
   },
   "devDependencies": {
-    "better-dx": "^0.2.5"
+    "better-dx": "^0.2.6"
   },
   "git-hooks": {
     "pre-commit": {
