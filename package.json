@@ -74,8 +74,8 @@
     "format:fix": "bunx --bun pickier . --format --write"
   },
   "dependencies": {
-    "ts-videos": "link:ts-videos",
-    "@ts-videos/mp4": "link:@ts-videos/mp4"
+    "ts-videos": "github:stacksjs/ts-videos",
+    "@ts-videos/mp4": "github:stacksjs/ts-videos"
   },
   "devDependencies": {
     "better-dx": "^0.2.5",
