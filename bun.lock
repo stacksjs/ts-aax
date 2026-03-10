@@ -9,7 +9,7 @@
         "ts-videos": "github:stacksjs/ts-videos",
       },
       "devDependencies": {
-        "better-dx": "^0.2.5",
+        "better-dx": "^0.2.6",
         "bun-git-hooks": "^0.3.1",
       },
     },
