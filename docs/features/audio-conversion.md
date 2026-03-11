@@ -180,6 +180,7 @@ aax convert audiobook.aax --pattern "{author} - {title}"
 ```
 
 Available placeholders:
+
 - `{title}` - Book title
 - `{author}` - Author name
 - `{narrator}` - Narrator name

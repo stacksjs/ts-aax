@@ -13,6 +13,7 @@ aax chapters audiobook.aax
 ```
 
 Output:
+
 ```
 Chapter 1: Opening Credits      00:00:00 - 00:02:15
 Chapter 2: Introduction         00:02:15 - 00:15:30
@@ -273,7 +274,7 @@ await splitByChapters('audiobook.aax', {
 ### Create Podcast Episodes
 
 ```bash
-#!/bin/bash
+# !/bin/bash
 aax split audiobook.aax \
   --format mp3 \
   --bitrate 96k \

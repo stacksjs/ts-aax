@@ -2,7 +2,7 @@
 
 AAX files are encrypted with DRM protection. To convert them, you need your Audible account's activation bytes. This guide covers obtaining and using activation bytes.
 
-## What Are Activation Bytes?
+## What Are Activation Bytes
 
 Activation bytes are a unique 8-character hexadecimal code tied to your Audible account. They're used to decrypt the audio content in AAX files.
 
@@ -165,11 +165,13 @@ Error: Activation bytes invalid for this file
 ```
 
 Causes:
+
 - Wrong account's activation bytes
 - File from different Audible region
 - Corrupted activation bytes
 
 Solutions:
+
 ```bash
 # Re-extract activation bytes
 aax auth extract --force
@@ -251,7 +253,7 @@ aax convert audiobook.aax --no-cache-auth
 For batch processing without manual intervention:
 
 ```bash
-#!/bin/bash
+# !/bin/bash
 export AUDIBLE_ACTIVATION_BYTES=$(aax auth get)
 aax convert ./audiobooks/ --batch
 ```

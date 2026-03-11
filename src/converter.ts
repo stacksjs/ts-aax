@@ -12,8 +12,8 @@ import { logger, reportError } from './utils/logger'
 import { getBookMetadata } from './utils/metadata'
 
 /** Sanitize a string for use as a filename or directory name on macOS/Windows/Linux */
-function sanitizeName(name: string): string {
-  return name
+function sanitizeName(_input: string): string {
+  return _input
     .replace(/:/g, ' -')
     .replace(/[/\\?*"<>|]/g, '')
     .replace(/\s+/g, ' ')

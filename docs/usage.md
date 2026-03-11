@@ -68,7 +68,7 @@ aax convert your-audiobook.aax --variable-bit-rate --aac-encoding-44-1
 # Run the setup command
 aax setup-audible
 
-# This will:
+# This will
 # 1. Check if the audible binary exists
 # 2. Make it executable
 # 3. Run the quickstart wizard

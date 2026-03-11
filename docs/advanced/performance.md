@@ -109,7 +109,7 @@ aax convert audiobook.aax --temp-dir /Volumes/RAMDisk/
 export default {
   performance: {
     streamOutput: true, // Stream directly to output
-    bufferSize: 64 * 1024 * 1024, // 64MB buffer
+    bufferSize: 64 _ 1024 _ 1024, // 64MB buffer
   },
 }
 ```
@@ -221,7 +221,7 @@ aax convert large-audiobook.aax --streaming
 ```typescript
 await convert('large-audiobook.aax', {
   streaming: true,
-  chunkSize: 128 * 1024 * 1024, // 128MB chunks
+  chunkSize: 128 _ 1024 _ 1024, // 128MB chunks
 })
 ```
 
@@ -234,6 +234,7 @@ aax convert audiobook.aax --profile
 ```
 
 Output:
+
 ```
 Profile Results:
   Decryption:    45s (30%)
@@ -315,13 +316,16 @@ VOLUME /tmp
 ### GitHub Actions
 
 ```yaml
+
 - name: Setup cache
+
   uses: actions/cache@v4
   with:
     path: ~/.aax/cache
     key: aax-cache-${{ runner.os }}
 
 - name: Convert audiobooks
+
   run: aax convert ./audiobooks/ --skip-existing
 ```
 

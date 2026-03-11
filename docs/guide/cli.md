@@ -13,6 +13,7 @@ aax convert <input-file> [options]
 ```
 
 **Arguments:**
+
 - `<input-file>` - Path to the AAX file to convert
 
 **Options:**
@@ -58,6 +59,7 @@ aax split <input-file> [options]
 ```
 
 **Arguments:**
+
 - `<input-file>` - Path to the AAX file to split
 
 **Options:**
@@ -83,6 +85,7 @@ aax setup-audible
 ```
 
 This command will:
+
 1. Check if the Audible CLI binary exists
 2. Make it executable
 3. Run the quickstart wizard for authentication
@@ -149,12 +152,12 @@ Convert multiple files using shell scripting:
 
 ```bash
 # Convert all AAX files in a directory
-for file in *.aax; do
+for file in _.aax; do
   aax convert "$file" --format m4b
 done
 
 # Using find for recursive conversion
-find . -name "*.aax" -exec aax convert {} --format m4b \;
+find . -name "_.aax" -exec aax convert {} --format m4b \;
 ```
 
 ## Activation Code
@@ -239,6 +242,7 @@ Error: Conversion failed
 ```
 
 Try:
+
 1. Check that the AAX file is not corrupted
 2. Ensure you have sufficient disk space
 3. Run with `--verbose` for more details

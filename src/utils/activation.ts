@@ -235,7 +235,7 @@ export function getActivationBytesFromAudibleCli(): string | null {
 
   // Fallback: try running the audible CLI binary
   try {
-    let audibleBinPath = 'audible'
+    const audibleBinPath = 'audible'
     try {
       execSync('which audible', { stdio: 'ignore' })
     }

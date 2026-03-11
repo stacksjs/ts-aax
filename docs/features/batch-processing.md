@@ -85,9 +85,10 @@ aax convert ./audiobooks/ --progress
 ```
 
 Output:
+
 ```
 Converting: [===========         ] 55% (11/20)
-Current: The_Great_Gatsby.aax (3:45 remaining)
+Current: The*Great*Gatsby.aax (3:45 remaining)
 Completed: 10 | Failed: 1 | Remaining: 9
 ```
 
@@ -291,7 +292,7 @@ aax queue clear
 ### Weekend Batch Job
 
 ```bash
-#!/bin/bash
+# !/bin/bash
 aax convert ./audiobooks/ \
   --format m4b \
   --quality high \
@@ -304,7 +305,9 @@ aax convert ./audiobooks/ \
 ### CI/CD Conversion
 
 ```yaml
+
 - name: Convert audiobooks
+
   run: |
     aax convert ./uploads/ \
       --format mp3 \

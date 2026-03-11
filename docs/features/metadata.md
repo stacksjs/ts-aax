@@ -11,6 +11,7 @@ aax info audiobook.aax
 ```
 
 Output:
+
 ```
 Title:       The Great Gatsby
 Author:      F. Scott Fitzgerald
@@ -282,6 +283,7 @@ aax metadata validate audiobook.aax
 ```
 
 Output:
+
 ```
 Validation Results:
   Title:      OK
@@ -358,7 +360,7 @@ await Bun.write('library-index.json', JSON.stringify(byAuthor, null, 2))
 ### Batch Cover Update
 
 ```bash
-#!/bin/bash
+# !/bin/bash
 for file in ./audiobooks/*.aax; do
   aax cover "$file" --output "./covers/$(basename "$file" .aax).jpg"
 done

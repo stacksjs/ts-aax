@@ -13,15 +13,18 @@ aax convert audiobook.aax --format mp3
 ```
 
 **Pros:**
+
 - Universal compatibility with all devices
 - Smaller file sizes at lower bitrates
 - Widely supported by all audio players
 
 **Cons:**
+
 - Does not natively support chapters (chapter marks stored separately)
 - Lossy compression at all quality levels
 
 **Recommended for:**
+
 - Devices with limited storage
 - Sharing with others
 - Maximum compatibility
@@ -35,15 +38,18 @@ aax convert audiobook.aax --format m4a
 ```
 
 **Pros:**
+
 - Better audio quality than MP3 at the same bitrate
 - Supports chapter markers
 - Good device compatibility (Apple devices, modern players)
 
 **Cons:**
+
 - Not as universally compatible as MP3
 - Slightly larger file sizes
 
 **Recommended for:**
+
 - Apple devices (iPhone, iPad, Mac)
 - When quality matters more than compatibility
 
@@ -56,16 +62,19 @@ aax convert audiobook.aax --format m4b
 ```
 
 **Pros:**
+
 - Native chapter support with navigation
 - Remembers playback position
 - Recognized as audiobook by most players
 - Same quality as M4A
 
 **Cons:**
+
 - Limited to audiobook-aware players
 - Some devices may not recognize the format
 
 **Recommended for:**
+
 - Dedicated audiobook players
 - Apple Books
 - When chapter navigation is important

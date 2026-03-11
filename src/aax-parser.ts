@@ -473,7 +473,7 @@ function buildSampleTable(
   result: ParsedMoov,
 ): void {
   // Parse stts (sample-to-time)
-  const sttsVersion = sttsData.length >= 4 ? readU32(sttsData, 0) : 0
+  const _sttsVersion = sttsData.length >= 4 ? readU32(sttsData, 0) : 0
   const sttsEntryCount = sttsData.length >= 8 ? readU32(sttsData, 4) : 0
   const sttsDurations: Array<{ count: number, delta: number }> = []
 

@@ -35,5 +35,3 @@ features:
     icon: "⚙️"
     details: "Utilize advanced conversion settings for optimal results."
 ---
-
-<Home />
