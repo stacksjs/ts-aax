@@ -58,7 +58,7 @@
     "changelog": "bunx logsmith --verbose",
     "changelog:generate": "bunx logsmith --output CHANGELOG.md",
     "release": "bun run changelog:generate && bunx bumpx prompt --recursive",
-    "postinstall": "bunx git-hooks",
+    "postinstall": "bun run scripts/patch-ts-videos.ts && bunx git-hooks",
     "dev:docs": "bun --bun vitepress dev docs",
     "build:docs": "bun --bun vitepress build docs",
     "preview:docs": "bun --bun vitepress preview docs",
@@ -74,6 +74,7 @@
     "format:fix": "bunx --bun pickier . --format --write"
   },
   "dependencies": {
+    "cac": "^7.0.0",
     "ts-videos": "github:stacksjs/ts-videos",
     "@ts-videos/mp4": "github:stacksjs/ts-videos"
   },

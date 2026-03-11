@@ -19,6 +19,12 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "skipDefaultLibCheck": true,
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "ts-videos/*": ["./node_modules/ts-videos/packages/ts-videos/src/*"],
+      "@ts-videos/mp4/*": ["./node_modules/ts-videos/packages/mp4/src/*"]
+    }
+  },
+  "exclude": ["docs", "node_modules"]
 }
