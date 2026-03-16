@@ -229,7 +229,8 @@ function parseTrak(data: Uint8Array, result: ParsedMoov): void {
       const handler = getHandlerType(mdiaData)
       if (handler === 'soun') {
         parseMdia(mdiaData, result)
-      } else if (handler === 'text') {
+      }
+else if (handler === 'text') {
         // Chapter text track — extract sample table for reading chapter titles
         const chapterResult: ParsedMoov = {
           adrmContent: null, checksum: null, esdsConfig: null,

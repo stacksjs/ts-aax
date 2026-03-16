@@ -1,10 +1,10 @@
 <p align="center"><img src=".github/art/cover.jpg" alt="Social Card of this repo"></p>
 
-[![npm version][npm-version-src]][npm-version-href]
-[![GitHub Actions][github-actions-src]][github-actions-href]
+[![npm version](https://img.shields.io/npm/v/@stacksjs/aax?style=flat-square)](https://npmjs.com/package/@stacksjs/aax)
+[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/stacksjs/aax/ci.yml?style=flat-square&branch=main)](https://github.com/stacksjs/aax/actions?query=workflow%3Aci)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 <!-- [![npm downloads][npm-downloads-src]][npm-downloads-href] -->
-<!-- [![Codecov][codecov-src]][codecov-href] -->
+<!-- [![Codecov][codecov-src]](https://codecov.io/gh/stacksjs/aax -->) -->
 
 # AAX Audio Converter
 
@@ -34,7 +34,7 @@ npx @stacksjs/aax
 
 - `ffmpeg` & [`audible`](https://github.com/mkb79/audible-cli) must be installed and available in your PATH
 
-_Please read [Using the Audible CLI Integration](#using-the-audible-cli-integration) for more information._
+Please read [Using the Audible CLI Integration](#using-the-audible-cli-integration) for more information.
 
 ## CLI Usage
 
@@ -140,9 +140,9 @@ This tool integrates with the Audible CLI to automatically retrieve activation b
 ### Prerequisites
 
 1. Download the Audible CLI binary and place it in the root of your project:
-   - [Audible CLI Releases](https://github.com/mkb79/audible-cli/releases)
-   - Choose the appropriate version for your OS (e.g., `audible-cli-0.2.0-windows-amd64.exe` for Windows)
-   - Rename it to `audible` and place it in the project root
+  - [Audible CLI Releases](https://github.com/mkb79/audible-cli/releases)
+  - Choose the appropriate version for your OS (e.g., `audible-cli-0.2.0-windows-amd64.exe` for Windows)
+  - Rename it to `audible` and place it in the project root
 
 ### Setting up Audible CLI
 
@@ -205,7 +205,7 @@ Note that this software does not 'crack' the DRM or circumvent it in any other w
 
 Please only use this application for gaining full access to your own audiobooks for archiving / conversion / convenience. De-DRMed audiobooks must not be uploaded to open servers, torrents, or other methods of mass distribution. No help will be given to people doing such things. Authors, retailers and publishers all need to make a living, so that they can continue to produce audiobooks for us to listen to and enjoy.
 
-_Amazon's lack of Mac support requires us to act._
+Amazon's lack of Mac support requires us to act.
 
 ## Contributing
 
@@ -245,10 +245,5 @@ The MIT License (MIT). Please see [LICENSE](LICENSE.md) for more information.
 Made with 💙
 
 <!-- Badges -->
-[npm-version-src]: https://img.shields.io/npm/v/@stacksjs/aax?style=flat-square
-[npm-version-href]: https://npmjs.com/package/@stacksjs/aax
-[github-actions-src]: https://img.shields.io/github/actions/workflow/status/stacksjs/aax/ci.yml?style=flat-square&branch=main
-[github-actions-href]: https://github.com/stacksjs/aax/actions?query=workflow%3Aci
 
 <!-- [codecov-src]: https://img.shields.io/codecov/c/gh/stacksjs/aax/main?style=flat-square
-[codecov-href]: https://codecov.io/gh/stacksjs/aax -->

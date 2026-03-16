@@ -207,7 +207,7 @@ const config: AAXConfig = {
 export default config
 ```
 
-_Then run:_
+Then run:
 
 ```bash
 aax convert your-audiobook.aax

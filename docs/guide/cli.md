@@ -12,11 +12,11 @@ Convert an AAX file to another format.
 aax convert <input-file> [options]
 ```
 
-**Arguments:**
+#### Arguments
 
 - `<input-file>` - Path to the AAX file to convert
 
-**Options:**
+#### Options
 
 | Option | Alias | Description | Default |
 |--------|-------|-------------|---------|
@@ -34,7 +34,7 @@ aax convert <input-file> [options]
 | `--skip-short-chapters-duration` | | Skip short chapters (seconds) | `0` |
 | `--skip-very-short-chapter-duration` | | Skip very short chapters (seconds) | `0` |
 
-**Examples:**
+#### Examples
 
 ```bash
 # Basic conversion to MP3
@@ -58,15 +58,15 @@ Split an audiobook into separate chapter files.
 aax split <input-file> [options]
 ```
 
-**Arguments:**
+#### Arguments
 
 - `<input-file>` - Path to the AAX file to split
 
-**Options:**
+#### Options
 
 All options from `convert` apply, plus the output will be organized by chapter.
 
-**Examples:**
+#### Examples
 
 ```bash
 # Split into MP3 chapter files
@@ -91,7 +91,7 @@ This command will:
 3. Run the quickstart wizard for authentication
 4. Retrieve and save your activation bytes
 
-**Example:**
+#### Example
 
 ```bash
 aax setup-audible
