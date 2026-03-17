@@ -95,9 +95,9 @@ If you encounter issues with FFmpeg:
 3. Ensure all required codecs are installed
 4. Check the verbose output for FFmpeg errors:
 
-   ```bash
-   aax convert audiobook.aax -v
-   ```
+  ```bash
+  aax convert audiobook.aax -v
+  ```
 
 ::: tip
 For most users, the default FFmpeg installation from your package manager will work perfectly.

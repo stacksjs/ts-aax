@@ -80,9 +80,9 @@ If auto-detection fails:
 2. Run `aax setup-audible` to reconfigure
 3. Check the verbose output for errors:
 
-   ```bash
-   aax convert audiobook.aax -v
-   ```
+  ```bash
+  aax convert audiobook.aax -v
+  ```
 
 ::: tip
 The auto-detection feature makes it much easier to convert your audiobooks, as you don't need to manually find and enter activation codes.

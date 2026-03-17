@@ -15,7 +15,7 @@ import { getBookMetadata } from './utils/metadata'
 function sanitizeName(_input: string): string {
   return _input
     .replace(/:/g, ' -')
-    .replace(/[/\\?*"<>|]/g, '')
+    .replace(/[/\\?*\x22<>|]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
 }

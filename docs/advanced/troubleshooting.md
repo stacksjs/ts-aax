@@ -12,17 +12,17 @@ This guide helps you resolve common issues with AAX Audio Converter.
 
 1. Run the setup command:
 
-   ```bash
-   aax setup-audible
-   ```
+  ```bash
+  aax setup-audible
+  ```
 
 2. Verify the Audible CLI is installed and configured
 3. Check if you're logged in to your Audible account
 4. Try manually specifying the activation code:
 
-   ```bash
-   aax convert audiobook.aax -c YOUR_ACTIVATION_CODE
-   ```
+  ```bash
+  aax convert audiobook.aax -c YOUR_ACTIVATION_CODE
+  ```
 
 ### FFmpeg Issues
 
@@ -32,19 +32,19 @@ This guide helps you resolve common issues with AAX Audio Converter.
 
 1. Verify FFmpeg is installed:
 
-   ```bash
-   ffmpeg -version
-   ```
+  ```bash
+  ffmpeg -version
+  ```
 
 2. Check if FFmpeg is in your PATH
 3. Specify a custom FFmpeg path in your config:
 
-   ```typescript
-   // aax.config.ts
-   export default {
-     ffmpegPath: '/path/to/your/ffmpeg',
-   }
-   ```
+  ```typescript
+  // aax.config.ts
+  export default {
+    ffmpegPath: '/path/to/your/ffmpeg',
+  }
+  ```
 
 ### Chapter Issues
 
@@ -54,9 +54,9 @@ This guide helps you resolve common issues with AAX Audio Converter.
 
 1. Ensure chapter support is enabled:
 
-   ```bash
-   aax convert audiobook.aax --chapters=true
-   ```
+  ```bash
+  aax convert audiobook.aax --chapters=true
+  ```
 
 2. Check if your output format supports chapters (M4B is best)
 3. Verify your media player supports chapter navigation
@@ -69,21 +69,21 @@ This guide helps you resolve common issues with AAX Audio Converter.
 
 1. Check file permissions:
 
-   ```bash
-   ls -l audiobook.aax
-   ```
+  ```bash
+  ls -l audiobook.aax
+  ```
 
 2. Ensure write permissions for the output directory:
 
-   ```bash
-   chmod +w output-directory
-   ```
+  ```bash
+  chmod +w output-directory
+  ```
 
 3. Try running with sudo (not recommended):
 
-   ```bash
-   sudo aax convert audiobook.aax
-   ```
+  ```bash
+  sudo aax convert audiobook.aax
+  ```
 
 ### Custom Folder Structure Issues
 

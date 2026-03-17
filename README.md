@@ -195,9 +195,9 @@ If the automated setup fails, you can do it manually:
 4. Note the activation code (a 8-character hex string like `2c1eeb0a`)
 5. Use this code with the convert command:
 
-   ```bash
-   aax convert your-audiobook.aax -c YOUR_ACTIVATION_CODE
-   ```
+  ```bash
+  aax convert your-audiobook.aax -c YOUR_ACTIVATION_CODE
+  ```
 
 ## Anti-Piracy Notice
 

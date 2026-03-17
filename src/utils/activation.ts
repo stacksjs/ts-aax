@@ -73,8 +73,8 @@ function findSystemActivationCode(): string | null {
         const patterns = [
           /activation_bytes\s*=\s*([0-9a-fA-F]+)/,
           /ActivationBytes\s*=\s*([0-9a-f]+)/i,
-          /"player_key"\s*:\s*"([0-9a-fA-F]+)"/,
-          /key="([0-9a-fA-F]+)"/,
+          /\x22player_key\x22\s*:\s*\x22([0-9a-fA-F]+)\x22/,
+          /key=\x22([0-9a-fA-F]+)\x22/,
         ]
 
         for (const pattern of patterns) {
