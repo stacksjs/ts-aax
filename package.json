@@ -80,7 +80,8 @@
   },
   "devDependencies": {
     "better-dx": "^0.2.7",
-    "bun-git-hooks": "^0.3.1"
+    "bun-git-hooks": "^0.3.1",
+    "cac": "^7.0.0"
   },
   "git-hooks": {
     "pre-commit": {
