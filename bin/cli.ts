@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import process from 'node:process'
-import { CAC } from 'cac'
+import { CLI as CAC } from '@stacksjs/clapp'
 import { version } from '../package.json'
 import { config, convertAAX, isValidActivationCode, splitToChapters } from '../src'
 import { getActivationBytesFromAudibleCli } from '../src/utils/activation'
