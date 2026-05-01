@@ -57,7 +57,7 @@
 
     "@ts-cloud/core": ["@ts-cloud/core@0.2.3", "", { "dependencies": { "@ts-cloud/aws-types": "0.2.3" } }, "sha512-SCCKrQFFdjstZ0eevMxCQ0w6JsMjkPj4zJSpNZ206q3Ye27kZmEpwtbJ88W4DVfUb0BI31ErK49JmtZDnRcieQ=="],
 
-    "@ts-videos/mp4": ["ts-videos-monorepo@github:stacksjs/ts-videos#fb1a761", {}, "stacksjs-ts-videos-fb1a761", "sha512-Y8sib2st+KkHBUIkQT/Px7/De4pDsCToiFyixL3M5Kn7KfRAzARhDo1OZnwN8IMCrh8UA/P6OQy0j/Ldo5p9FA=="],
+    "@ts-videos/mp4": ["ts-videos-monorepo@github:stacksjs/ts-videos#af1f52e", {}, "stacksjs-ts-videos-af1f52e", "sha512-VOJLunyUB2MMpSHRJU9PAQPLoRFpOrjjM9znOcJj+v+7EmSjxnKd1qrKEpUBacpzFmeJsVRqfVqtFZA6UoDyQA=="],
 
     "@types/bun": ["@types/bun@1.3.13", "", { "dependencies": { "bun-types": "1.3.13" } }, "sha512-9fqXWk5YIHGGnUau9TEi+qdlTYDAnOj+xLCmSTwXfAIqXr2x4tytJb43E9uCvt09zJURKXwAtkoH4nLQfzeTXw=="],
 
@@ -97,7 +97,7 @@
 
     "brace-expansion": ["brace-expansion@2.1.0", "", { "dependencies": { "balanced-match": "^1.0.0" } }, "sha512-TN1kCZAgdgweJhWWpgKYrQaMNHcDULHkWwQIspdtjV4Y5aurRdZpjAqn6yX3FPqTA9ngHCc4hJxMAMgGfve85w=="],
 
-    "buddy-bot": ["buddy-bot@0.9.18", "", { "dependencies": { "bunfig": "^0.15.6", "prompts": "^2.4.2", "ts-pantry": "^0.8.16" }, "bin": { "buddy-bot": "./dist/bin/cli.js" } }, "sha512-OWubiloY6XuUbAPrURZoGRWn7AhGeeT8RXlpz66tfBOFbijxVr6eT3CcUmb27vMC1n986ZuZWAZUzIFbkMjUxg=="],
+    "buddy-bot": ["buddy-bot@0.9.19", "", { "dependencies": { "bunfig": "^0.15.6", "prompts": "^2.4.2", "ts-pantry": "^0.8.16" }, "bin": { "buddy-bot": "./dist/bin/cli.js" } }, "sha512-ZwnFngjei9ssDCpjejUCslEke6Q5006jubuEcIpkwckg1P+ojph3iAIDZyyiFgyeQkuaBCqnEbxnrsAcf2pxow=="],
 
     "buffer": ["buffer@6.0.3", "", { "dependencies": { "base64-js": "^1.3.1", "ieee754": "^1.2.1" } }, "sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA=="],
 
@@ -189,7 +189,7 @@
 
     "path-scurry": ["path-scurry@1.11.1", "", { "dependencies": { "lru-cache": "^10.2.0", "minipass": "^5.0.0 || ^6.0.2 || ^7.0.0" } }, "sha512-Xa4Nw17FS9ApQFJ9umLiJS4orGjm7ZzwUrwamcGQuHSzDyth9boKDaycYdDcZDuqYATXw4HFXgaqWTctW/v1HA=="],
 
-    "pickier": ["pickier@0.1.24", "", { "dependencies": { "@stacksjs/clapp": "^0.2.0" }, "optionalDependencies": { "ts-spell-check": "^0.1.0" }, "bin": { "pickier": "./dist/bin/cli.js" } }, "sha512-mXP3IiPa1HK0K1WClrI13MKx8+0uCKQdtaz6VeRKa0cfwSqwdUsvCX1kntv9pw6lYesmdAIks0VOkUAiIGzswA=="],
+    "pickier": ["pickier@0.1.25", "", { "dependencies": { "@stacksjs/clapp": "^0.2.0" }, "optionalDependencies": { "ts-spell-check": "^0.1.0" }, "bin": { "pickier": "./dist/bin/cli.js" } }, "sha512-CAB+NxLSbC2/jnwNd1JXjNcCzG35GHO1O5Y+V8Ah4IX8rgow0K0aGQ7e1O6z6kQvmsMyBCc+3yuqQRU9A7J8Vg=="],
 
     "process": ["process@0.11.10", "", {}, "sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A=="],
 
@@ -247,7 +247,7 @@
 
     "ts-syntax-highlighter": ["ts-syntax-highlighter@0.2.1", "", { "bin": { "ts-syntax-highlighter": "dist/bin/cli.js" } }, "sha512-HEfxaVKifwvnX0NaOE8nfs4VFdZo6WdREj1KRehelfYsO1N+m9vOIj5exhlOqFpxOPWd4BlalU8y0WWS7yPWjw=="],
 
-    "ts-videos": ["ts-videos-monorepo@github:stacksjs/ts-videos#fb1a761", {}, "stacksjs-ts-videos-fb1a761", "sha512-Y8sib2st+KkHBUIkQT/Px7/De4pDsCToiFyixL3M5Kn7KfRAzARhDo1OZnwN8IMCrh8UA/P6OQy0j/Ldo5p9FA=="],
+    "ts-videos": ["ts-videos-monorepo@github:stacksjs/ts-videos#af1f52e", {}, "stacksjs-ts-videos-af1f52e", "sha512-VOJLunyUB2MMpSHRJU9PAQPLoRFpOrjjM9znOcJj+v+7EmSjxnKd1qrKEpUBacpzFmeJsVRqfVqtFZA6UoDyQA=="],
 
     "ts-web-scraper": ["ts-web-scraper@0.1.1", "", { "bin": { "scraper": "dist/bin/cli.js" } }, "sha512-js+gSRe95yDD9U3+GmjvIKBYLAN9WoZKV84x7HcSI7dqdWEIoZSeSGR/Jbr8f5hCeV9FD70KdTPIS2LQwviQXQ=="],
 
