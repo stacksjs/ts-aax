@@ -1,0 +1,240 @@
+{
+  "version": "1.0",
+  "packages": {
+    "tcl-lang.org@8.6.16": {
+      "name": "tcl-lang.org",
+      "version": "8.6.16",
+      "resolved": "registry:tcl-lang.org@8.6.16"
+    },
+    "bun.sh@1.3.14": {
+      "name": "bun.sh",
+      "version": "1.3.14",
+      "resolved": "registry:bun.sh@1.3.14"
+    },
+    "x.org/xcb@1.17.0": {
+      "name": "x.org/xcb",
+      "version": "1.17.0",
+      "resolved": "registry:x.org/xcb@1.17.0"
+    },
+    "libjpeg-turbo.org@2.1.5.1": {
+      "name": "libjpeg-turbo.org",
+      "version": "2.1.5.1",
+      "resolved": "registry:libjpeg-turbo.org@2.1.5.1"
+    },
+    "zlib.net@1.3.2": {
+      "name": "zlib.net",
+      "version": "1.3.2",
+      "resolved": "registry:zlib.net@1.3.2"
+    },
+    "freetype.org@2.14.3": {
+      "name": "freetype.org",
+      "version": "2.14.3",
+      "resolved": "registry:freetype.org@2.14.3"
+    },
+    "google.com/webp@1.6.0": {
+      "name": "google.com/webp",
+      "version": "1.6.0",
+      "resolved": "registry:google.com/webp@1.6.0"
+    },
+    "tukaani.org/xz@5.8.2": {
+      "name": "tukaani.org/xz",
+      "version": "5.8.2",
+      "resolved": "registry:tukaani.org/xz@5.8.2"
+    },
+    "opus-codec.org@1.6.1": {
+      "name": "opus-codec.org",
+      "version": "1.6.1",
+      "resolved": "registry:opus-codec.org@1.6.1"
+    },
+    "oberhumer.com/lzo@2.10.0": {
+      "name": "oberhumer.com/lzo",
+      "version": "2.10.0",
+      "resolved": "registry:oberhumer.com/lzo@2.10.0"
+    },
+    "lame.sourceforge.io@3.100.0": {
+      "name": "lame.sourceforge.io",
+      "version": "3.100.0",
+      "resolved": "registry:lame.sourceforge.io@3.100.0"
+    },
+    "x.org/protocol@2025.1.0": {
+      "name": "x.org/protocol",
+      "version": "2025.1.0",
+      "resolved": "registry:x.org/protocol@2025.1.0"
+    },
+    "x.org/xdmcp@1.1.5": {
+      "name": "x.org/xdmcp",
+      "version": "1.1.5",
+      "resolved": "registry:x.org/xdmcp@1.1.5"
+    },
+    "bytereef.org/mpdecimal@2.5.1": {
+      "name": "bytereef.org/mpdecimal",
+      "version": "2.5.1",
+      "resolved": "registry:bytereef.org/mpdecimal@2.5.1"
+    },
+    "sqlite.org@3.53.2": {
+      "name": "sqlite.org",
+      "version": "3.53.2",
+      "resolved": "registry:sqlite.org@3.53.2"
+    },
+    "gnu.org/readline@8.3.0": {
+      "name": "gnu.org/readline",
+      "version": "8.3.0",
+      "resolved": "registry:gnu.org/readline@8.3.0"
+    },
+    "gnome.org/glib@2.88.0": {
+      "name": "gnome.org/glib",
+      "version": "2.88.0",
+      "resolved": "registry:gnome.org/glib@2.88.0"
+    },
+    "lz4.org@1.10.0": {
+      "name": "lz4.org",
+      "version": "1.10.0",
+      "resolved": "registry:lz4.org@1.10.0"
+    },
+    "x.org/util-macros@1.20.2": {
+      "name": "x.org/util-macros",
+      "version": "1.20.2",
+      "resolved": "registry:x.org/util-macros@1.20.2"
+    },
+    "simplesystems.org/libtiff@4.7.1": {
+      "name": "simplesystems.org/libtiff",
+      "version": "4.7.1",
+      "resolved": "registry:simplesystems.org/libtiff@4.7.1"
+    },
+    "unicode.org@71.1.0": {
+      "name": "unicode.org",
+      "version": "71.1.0",
+      "resolved": "registry:unicode.org@71.1.0"
+    },
+    "pixman.org@0.40.0": {
+      "name": "pixman.org",
+      "version": "0.40.0",
+      "resolved": "registry:pixman.org@0.40.0"
+    },
+    "x.org/x11@1.8.13": {
+      "name": "x.org/x11",
+      "version": "1.8.13",
+      "resolved": "registry:x.org/x11@1.8.13"
+    },
+    "pcre.org@8.45.0": {
+      "name": "pcre.org",
+      "version": "8.45.0",
+      "resolved": "registry:pcre.org@8.45.0"
+    },
+    "x.org/exts@1.3.7": {
+      "name": "x.org/exts",
+      "version": "1.3.7",
+      "resolved": "registry:x.org/exts@1.3.7"
+    },
+    "freedesktop.org/fontconfig@2.17.1": {
+      "name": "freedesktop.org/fontconfig",
+      "version": "2.17.1",
+      "resolved": "registry:freedesktop.org/fontconfig@2.17.1"
+    },
+    "invisible-island.net/ncurses@6.6.0": {
+      "name": "invisible-island.net/ncurses",
+      "version": "6.6.0",
+      "resolved": "registry:invisible-island.net/ncurses@6.6.0"
+    },
+    "facebook.com/zstd@1.5.7": {
+      "name": "facebook.com/zstd",
+      "version": "1.5.7",
+      "resolved": "registry:facebook.com/zstd@1.5.7"
+    },
+    "curl.se/ca-certs@2026.3.19": {
+      "name": "curl.se/ca-certs",
+      "version": "2026.3.19",
+      "resolved": "registry:curl.se/ca-certs@2026.3.19"
+    },
+    "giflib.sourceforge.io@5.2.2": {
+      "name": "giflib.sourceforge.io",
+      "version": "5.2.2",
+      "resolved": "registry:giflib.sourceforge.io@5.2.2"
+    },
+    "x.org/xrender@0.9.12": {
+      "name": "x.org/xrender",
+      "version": "0.9.12",
+      "resolved": "registry:x.org/xrender@0.9.12"
+    },
+    "videolan.org/x264@0.164.3095": {
+      "name": "videolan.org/x264",
+      "version": "0.164.3095",
+      "resolved": "registry:videolan.org/x264@0.164.3095"
+    },
+    "webmproject.org/libvpx@1.14.1": {
+      "name": "webmproject.org/libvpx",
+      "version": "1.14.1",
+      "resolved": "registry:webmproject.org/libvpx@1.14.1"
+    },
+    "pcre.org/v2@10.47.0": {
+      "name": "pcre.org/v2",
+      "version": "10.47.0",
+      "resolved": "registry:pcre.org/v2@10.47.0"
+    },
+    "freedesktop.org/pkg-config@0.29.2": {
+      "name": "freedesktop.org/pkg-config",
+      "version": "0.29.2",
+      "resolved": "registry:freedesktop.org/pkg-config@0.29.2"
+    },
+    "libsdl.org@2.32.10": {
+      "name": "libsdl.org",
+      "version": "2.32.10",
+      "resolved": "registry:libsdl.org@2.32.10"
+    },
+    "sourceware.org/bzip2@1.0.8": {
+      "name": "sourceware.org/bzip2",
+      "version": "1.0.8",
+      "resolved": "registry:sourceware.org/bzip2@1.0.8"
+    },
+    "libexpat.github.io@2.7.5": {
+      "name": "libexpat.github.io",
+      "version": "2.7.5",
+      "resolved": "registry:libexpat.github.io@2.7.5"
+    },
+    "libpng.org@1.6.55": {
+      "name": "libpng.org",
+      "version": "1.6.55",
+      "resolved": "registry:libpng.org@1.6.55"
+    },
+    "ffmpeg.org@7.1.3": {
+      "name": "ffmpeg.org",
+      "version": "7.1.3",
+      "resolved": "registry:ffmpeg.org@7.1.3"
+    },
+    "sourceware.org/libffi@3.6.0": {
+      "name": "sourceware.org/libffi",
+      "version": "3.6.0",
+      "resolved": "registry:sourceware.org/libffi@3.6.0"
+    },
+    "graphite.sil.org@1.3.15": {
+      "name": "graphite.sil.org",
+      "version": "1.3.15",
+      "resolved": "registry:graphite.sil.org@1.3.15"
+    },
+    "gnu.org/gettext@0.21.1": {
+      "name": "gnu.org/gettext",
+      "version": "0.21.1",
+      "resolved": "registry:gnu.org/gettext@0.21.1"
+    },
+    "gnome.org/libxml2@2.15.3": {
+      "name": "gnome.org/libxml2",
+      "version": "2.15.3",
+      "resolved": "registry:gnome.org/libxml2@2.15.3"
+    },
+    "x.org/xau@1.0.12": {
+      "name": "x.org/xau",
+      "version": "1.0.12",
+      "resolved": "registry:x.org/xau@1.0.12"
+    },
+    "videolan.org/x265@3.2.1": {
+      "name": "videolan.org/x265",
+      "version": "3.2.1",
+      "resolved": "registry:videolan.org/x265@3.2.1"
+    },
+    "cairographics.org@1.18.4": {
+      "name": "cairographics.org",
+      "version": "1.18.4",
+      "resolved": "registry:cairographics.org@1.18.4"
+    }
+  }
+}
