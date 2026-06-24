@@ -24,19 +24,27 @@ function generateOutputPath(metadata: any, options: ConversionOptions): string {
   const outputDir = options.outputDir || config.outputDir || '.'
   const outputFormat = options.outputFormat || config.outputFormat || 'm4b'
 
+  // Fall back to config for folder-structure options: the CLI builds a partial
+  // options object, so without this these settings in aax.config.ts are ignored.
+  const flatFolderStructure = options.flatFolderStructure ?? config.flatFolderStructure
+  const seriesTitleInFolderStructure = options.seriesTitleInFolderStructure ?? config.seriesTitleInFolderStructure
+  const fullCaptionForBookFolder = options.fullCaptionForBookFolder ?? config.fullCaptionForBookFolder
+  const sequenceNumberDigits = options.sequenceNumberDigits ?? config.sequenceNumberDigits
+  const partFolderPrefix = options.partFolderPrefix ?? config.partFolderPrefix
+
   let basePath = outputDir
 
   // Handle folder structure
-  if (!options.flatFolderStructure) {
+  if (!flatFolderStructure) {
     if (metadata.author) {
       basePath = path.join(basePath, sanitizeName(metadata.author))
     }
 
-    if (options.seriesTitleInFolderStructure && metadata.series) {
+    if (seriesTitleInFolderStructure && metadata.series) {
       basePath = path.join(basePath, sanitizeName(metadata.series))
     }
 
-    const bookFolder = options.fullCaptionForBookFolder
+    const bookFolder = fullCaptionForBookFolder
       ? metadata.title
       : metadata.title?.split(':')[0]
 
@@ -53,9 +61,9 @@ function generateOutputPath(metadata: any, options: ConversionOptions): string {
   filename = sanitizeName(filename)
 
   // Add part number if available
-  if (metadata.seriesIndex && options.sequenceNumberDigits) {
-    const partNum = String(metadata.seriesIndex).padStart(options.sequenceNumberDigits, '0')
-    filename = `${options.partFolderPrefix || ''}${partNum} - ${filename}`
+  if (metadata.seriesIndex && sequenceNumberDigits) {
+    const partNum = String(metadata.seriesIndex).padStart(sequenceNumberDigits, '0')
+    filename = `${partFolderPrefix || ''}${partNum} - ${filename}`
   }
 
   return path.join(basePath, `${filename}.${outputFormat}`)
@@ -79,6 +87,26 @@ export async function convertAAX(options: ConversionOptions): Promise<Conversion
     return {
       success: false,
       error: `Input file does not exist: ${options.inputFile}`,
+    }
+  }
+
+  // Validate the requested output format up front, before any expensive parsing
+  // or decryption work. Conversion is a lossless decrypt-and-remux of the source
+  // AAC stream, so only AAC-in-MP4 containers (m4b/m4a) are supported; MP3 would
+  // require a transcode step that does not exist here.
+  const outputFormat = options.outputFormat || config.outputFormat || 'm4b'
+  if (outputFormat !== 'm4b' && outputFormat !== 'm4a') {
+    reportError(new Error(`Unsupported output format: ${outputFormat}`), {
+      heading: `Output format "${outputFormat}" is not supported.`,
+      details: 'AAX conversion remuxes the original AAC audio without transcoding, so only m4b and m4a are available.',
+      hints: [
+        'Use m4b (recommended for audiobooks) or m4a',
+        'Set outputFormat: "m4b" in aax.config.ts',
+      ],
+    })
+    return {
+      success: false,
+      error: `Output format "${outputFormat}" is not supported. Use m4b or m4a.`,
     }
   }
 
@@ -136,61 +164,29 @@ export async function convertAAX(options: ConversionOptions): Promise<Conversion
       }
     }
 
-    // Validate the activation bytes
-    const isValid = validateActivationBytes(aaxInfo.adrmContent, activationBytes)
-    if (!isValid) {
-      // Try lowercase
-      try {
-        const lowerBytes = parseActivationBytes(activationCode.toLowerCase())
-        const isValidLower = validateActivationBytes(aaxInfo.adrmContent, lowerBytes)
-        if (isValidLower) {
-          activationBytes = lowerBytes
-          logger.debug('Lowercase activation code validated successfully')
-        }
-        else {
-          reportError(new Error('Invalid activation code'), {
-            heading: 'Activation code validation failed.',
-            details: 'The provided activation code does not match this AAX file\'s DRM.',
-            hints: [
-              'Verify the activation code is correct',
-              'Try a different activation code',
-              'Use `aax setup-audible` to fetch your activation bytes',
-            ],
-          })
-          return {
-            success: false,
-            error: 'Activation code does not match this AAX file',
-          }
-        }
-      }
-      catch {
-        return {
-          success: false,
-          error: 'Activation code does not match this AAX file',
-        }
+    // Validate the activation bytes against this file's DRM. Activation codes are
+    // hex, and parseActivationBytes is case-insensitive, so there is no separate
+    // lowercase variant to retry — equal hex yields identical bytes.
+    if (!validateActivationBytes(aaxInfo.adrmContent, activationBytes)) {
+      reportError(new Error('Invalid activation code'), {
+        heading: 'Activation code validation failed.',
+        details: 'The provided activation code does not match this AAX file\'s DRM.',
+        hints: [
+          'Verify the activation code is correct',
+          'Try a different activation code',
+          'Use `aax setup-audible` to fetch your activation bytes',
+        ],
+      })
+      return {
+        success: false,
+        error: 'Activation code does not match this AAX file',
       }
     }
 
     const keys = deriveKeys(aaxInfo.adrmContent, activationBytes)
     logger.info('Decryption keys derived successfully')
 
-    // Determine output format and path
-    const outputFormat = options.outputFormat || config.outputFormat || 'm4b'
-    if (outputFormat as string === 'mp3') {
-      reportError(new Error('MP3 output not supported'), {
-        heading: 'MP3 output is not currently supported.',
-        details: 'AAC-to-MP3 transcoding requires an audio decoder/encoder pipeline that is not yet available.',
-        hints: [
-          'Use m4b or m4a format instead (no transcoding needed, just decryption)',
-          'Set outputFormat: "m4b" in aax.config.ts',
-        ],
-      })
-      return {
-        success: false,
-        error: 'MP3 output is not currently supported. Use m4b or m4a format.',
-      }
-    }
-
+    // Output format was validated at the top of convertAAX
     const outputPath = generateOutputPath(metadata, options)
     const shortPath = path.basename(outputPath)
     logger.info(`Output format: ${outputFormat}`)
@@ -233,9 +229,12 @@ export async function convertAAX(options: ConversionOptions): Promise<Conversion
       muxer.setArtwork(metadata.coverImage, isJpeg ? 'jpeg' : 'png')
     }
 
-    // Add chapters
-    for (const chapter of aaxInfo.chapters) {
-      muxer.addChapter(chapter.title, chapter.startTime * 1000)
+    // Add chapters (unless explicitly disabled via chaptersEnabled)
+    const chaptersEnabled = options.chaptersEnabled ?? config.chaptersEnabled ?? true
+    if (chaptersEnabled) {
+      for (const chapter of aaxInfo.chapters) {
+        muxer.addChapter(chapter.title, chapter.startTime * 1000)
+      }
     }
 
     await muxer.start()
@@ -291,8 +290,10 @@ export async function convertAAX(options: ConversionOptions): Promise<Conversion
 
     progressBar.update(100, 'Conversion complete')
 
-    // Extract cover image if requested
-    if (options.extractCoverImage && metadata.coverImage) {
+    // Extract cover image to a sidecar file if requested (falls back to config,
+    // since the CLI does not pass this option through)
+    const extractCoverImage = options.extractCoverImage ?? config.extractCoverImage
+    if (extractCoverImage && metadata.coverImage) {
       const coverPath = path.join(path.dirname(outputPath), 'cover.jpg')
       try {
         const { writeFileSync } = await import('node:fs')
@@ -325,12 +326,178 @@ export async function convertAAX(options: ConversionOptions): Promise<Conversion
 }
 
 /**
- * Split an AAX file into chapters
+ * Convert an AAX file and split it into one output file per chapter.
+ * Each chapter file contains only that chapter's (decrypted) AAC samples, with
+ * the chapter title as its track title and the book's cover art and metadata.
+ * Falls back to a single file when the book has no usable chapter marks.
  */
 export async function splitToChapters(options: ConversionOptions): Promise<ConversionResult> {
-  logger.info('Converting and splitting audiobook by chapters...')
-  const chaptersEnabled = true
-  return convertAAX({ ...options, chaptersEnabled })
+  if (!options.inputFile) {
+    logger.error('No input file provided. Please specify an AAX file to convert.')
+    return { success: false, error: 'No input file provided' }
+  }
+  if (!existsSync(options.inputFile)) {
+    logger.error(`Input file does not exist: ${options.inputFile}`)
+    return { success: false, error: `Input file does not exist: ${options.inputFile}` }
+  }
+
+  const outputFormat = options.outputFormat || config.outputFormat || 'm4b'
+  if (outputFormat !== 'm4b' && outputFormat !== 'm4a') {
+    reportError(new Error(`Unsupported output format: ${outputFormat}`), {
+      heading: `Output format "${outputFormat}" is not supported.`,
+      details: 'AAX conversion remuxes the original AAC audio without transcoding, so only m4b and m4a are available.',
+      hints: ['Use m4b (recommended for audiobooks) or m4a'],
+    })
+    return { success: false, error: `Output format "${outputFormat}" is not supported. Use m4b or m4a.` }
+  }
+
+  const activationCode = options.activationCode || config.activationCode || await getActivationBytesFromAudibleCli()
+  if (!activationCode) {
+    reportError(new Error('Missing activation code'), {
+      heading: 'No activation code provided for decryption.',
+      details: 'Audible AAX files require an 8-character activation code (activation bytes) to decrypt.',
+      hints: [
+        'Provide activationCode in options or in aax.config.ts',
+        'Use Audible CLI to fetch: audible activation-bytes (run audible quickstart first)',
+      ],
+    })
+    return { success: false, error: 'No activation code provided. This is required to convert AAX files.' }
+  }
+
+  logger.info(`Using activation code: ${activationCode.substring(0, 2)}******`)
+
+  try {
+    logger.info('Parsing AAX file structure...')
+    const aaxInfo = await parseAaxFile(options.inputFile)
+    const metadata = aaxInfo.metadata
+
+    let activationBytes: Uint8Array
+    try {
+      activationBytes = parseActivationBytes(activationCode)
+    }
+    catch (e) {
+      await aaxInfo.source.close?.()
+      return { success: false, error: `Invalid activation code format: ${(e as Error).message}` }
+    }
+
+    if (!validateActivationBytes(aaxInfo.adrmContent, activationBytes)) {
+      await aaxInfo.source.close?.()
+      reportError(new Error('Invalid activation code'), {
+        heading: 'Activation code validation failed.',
+        details: 'The provided activation code does not match this AAX file\'s DRM.',
+        hints: ['Verify the activation code is correct', 'Use `aax setup-audible` to fetch your activation bytes'],
+      })
+      return { success: false, error: 'Activation code does not match this AAX file' }
+    }
+
+    const keys = deriveKeys(aaxInfo.adrmContent, activationBytes)
+    logger.info('Decryption keys derived successfully')
+
+    const chapters = aaxInfo.chapters
+    if (chapters.length <= 1) {
+      logger.warn('No usable chapter marks found — producing a single file instead of splitting.')
+      await aaxInfo.source.close?.()
+      return convertAAX(options)
+    }
+
+    // Reuse the single-file path logic to determine the destination folder.
+    const outDir = path.dirname(generateOutputPath(metadata, options))
+    logger.info(`Splitting into ${chapters.length} chapters -> ${outDir}`)
+
+    const samples = aaxInfo.samples
+    const { timescale } = aaxInfo
+
+    // Precompute each sample's start time (seconds). Samples are in time order,
+    // so chapter boundaries can be applied with a simple monotonic scan.
+    const sampleStart = new Array<number>(samples.length)
+    let cursor = 0
+    for (let i = 0; i < samples.length; i++) {
+      sampleStart[i] = cursor
+      cursor += samples[i].duration / timescale
+    }
+
+    const reader = new Reader(aaxInfo.source) as Reader & { position: number }
+    const isJpeg = !!metadata.coverImage && metadata.coverImage[0] === 0xFF && metadata.coverImage[1] === 0xD8
+    const digits = Math.max(2, String(chapters.length).length)
+    const outputs: string[] = []
+    const progressBar = logger.progress(100, 'Splitting...')
+    let processed = 0
+
+    for (let c = 0; c < chapters.length; c++) {
+      const chapter = chapters[c]
+      const chapterEnd = c + 1 < chapters.length ? chapters[c + 1].startTime : Number.POSITIVE_INFINITY
+      const titlePart = sanitizeName(chapter.title || `Chapter ${c + 1}`)
+      const fileName = `${String(c + 1).padStart(digits, '0')} - ${titlePart}.${outputFormat}`
+      const filePath = path.join(outDir, fileName)
+
+      const target = new FileTarget(filePath)
+      const muxer = new Mp4Muxer(target, { fastStart: true, brand: 'M4B ' })
+      const track = muxer.addAudioTrack({
+        codec: 'aac',
+        sampleRate: aaxInfo.sampleRate,
+        channels: aaxInfo.channelCount,
+        codecDescription: aaxInfo.esdsConfig,
+      })
+      muxer.setMetadata({
+        title: chapter.title || `Chapter ${c + 1}`,
+        artist: metadata.author,
+        albumArtist: metadata.narrator,
+        album: metadata.title,
+        genre: 'Audiobook',
+        year: metadata.publishingYear ? Number(metadata.publishingYear) : undefined,
+        copyright: metadata.copyright,
+        narrator: metadata.narrator,
+        publisher: metadata.publisher,
+      })
+      if (metadata.coverImage) {
+        muxer.setArtwork(metadata.coverImage, isJpeg ? 'jpeg' : 'png')
+      }
+      await muxer.start()
+
+      for (let i = 0; i < samples.length; i++) {
+        if (sampleStart[i] < chapter.startTime) continue
+        if (sampleStart[i] >= chapterEnd) break
+
+        const sample = samples[i]
+        reader.position = sample.offset
+        const encrypted = await reader.readBytes(sample.size)
+        if (!encrypted) {
+          logger.warn(`Failed to read sample at offset ${sample.offset}, skipping`)
+          continue
+        }
+        const decrypted = decryptSample(encrypted, keys.fileKey, keys.fileIv)
+        await muxer.writePacket(track.id, {
+          data: decrypted,
+          timestamp: sampleStart[i] - chapter.startTime, // reset clock per chapter file
+          duration: sample.duration / timescale,
+          isKeyframe: true,
+        })
+
+        processed++
+        if (processed % 1000 === 0) {
+          const percent = Math.min(99, (processed / samples.length) * 100)
+          progressBar.update(percent, `Chapter ${c + 1}/${chapters.length} — ${formatDuration(sampleStart[i])}`)
+        }
+      }
+
+      await muxer.finalize()
+      await target.close?.()
+      outputs.push(filePath)
+      logger.info(`  ✓ ${fileName}`)
+    }
+
+    await aaxInfo.source.close?.()
+    progressBar.update(100, 'Split complete')
+    logger.success(`Split into ${outputs.length} chapter files in: ${outDir}`)
+    return { success: true, outputPath: outDir }
+  }
+  catch (error) {
+    reportError(error, {
+      heading: 'Unexpected error while splitting.',
+      hints: ['Re-run with AAX_LOG_LEVEL=debug to include stack traces'],
+    })
+    return { success: false, error: `Error during split: ${(error as Error).message}` }
+  }
 }
 
 function formatDuration(seconds: number): string {

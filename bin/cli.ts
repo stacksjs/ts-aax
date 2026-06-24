@@ -58,7 +58,7 @@ cli
   })
 
 cli
-  .command('split <input>', 'Convert AAX audiobook and split by chapters')
+  .command('split <input>', 'Convert AAX audiobook into one file per chapter')
   .option('-o, --output <dir>', 'Output directory (default: ./converted)')
   .option('-f, --format <format>', 'Output format: m4a, m4b (default: m4b)')
   .option('-c, --code <code>', 'Audible activation code (will be auto-detected if not provided)')

@@ -8,16 +8,16 @@
 
 # AAX Audio Converter
 
-A TypeScript library and CLI tool for converting Audible AAX audiobooks to standard MP3, M4A, or M4B formats.
+A TypeScript library and CLI tool for converting Audible AAX audiobooks to M4B or M4A. Conversion is a lossless decrypt-and-remux of the original AAC audio — there is no re-encoding, so there is zero quality loss.
 
 ![Screenshot](.github/art/screenshot.png)
 
 ## Features
 
-- Convert AAX files to MP3, M4A, or M4B formats
-- Preserve chapter information
-- Automatically detect Audible activation code
-- Split audiobooks by chapters
+- Convert AAX files to M4B or M4A (lossless — the original AAC stream is preserved bit-for-bit)
+- Preserve chapter markers, embedded metadata, and cover art
+- Automatically detect the Audible activation code (via the `audible` CLI, or by trying known codes)
+- Pure-TypeScript decryption + MP4 remux — no `ffmpeg` required
 - Simple command-line interface
 
 ## Installation
@@ -32,13 +32,15 @@ npx @stacksjs/aax
 
 ## Requirements
 
-- `ffmpeg` & [`audible`](https://github.com/mkb79/audible-cli) must be installed and available in your PATH
+- [`audible`](https://github.com/mkb79/audible-cli) (optional) — only needed to auto-detect your activation code. If you already know your activation code you can pass it with `-c` and skip this entirely.
+
+No `ffmpeg` is required: decryption and remuxing are done entirely in TypeScript.
 
 Please read [Using the Audible CLI Integration](#using-the-audible-cli-integration) for more information.
 
 ## CLI Usage
 
-### Convert an AAX file to MP3
+### Convert an AAX file to M4B
 
 ```bash
 aax convert /path/to/audiobook.aax
@@ -47,30 +49,27 @@ aax convert /path/to/audiobook.aax
 ### Convert with custom options
 
 ```bash
-aax convert /path/to/audiobook.aax --format m4b --output ./my-audiobooks --bitrate 192
+aax convert /path/to/audiobook.aax --format m4a --output ./my-audiobooks --code 2c1eeb0a
 ```
 
-### Convert and split by chapters
+### Split into one file per chapter
 
 ```bash
 aax split /path/to/audiobook.aax
 ```
 
+This produces one output file per chapter (named `01 - <chapter title>.m4b`, etc.) in the book's output folder, each tagged with the chapter title and the book's cover art. Books without usable chapter marks fall back to a single file.
+
 ### Available CLI Options
 
 - `-o, --output <dir>` - Output directory (default: ./converted)
-- `-f, --format <format>` - Output format: mp3, m4a, m4b (default: mp3)
-- `-c, --code <code>` - Audible activation code (auto-detected if not provided)
+- `-f, --format <format>` - Output format: `m4b` or `m4a` (default: `m4b`)
+- `-c, --code <code>` - Audible activation code (8-char hex; auto-detected if not provided)
 - `--chapters` - Preserve chapter information (default: true)
-- `-b, --bitrate <kbps>` - Audio bitrate in kbps (default: 'source' to match the original file)
 - `-v, --verbose` - Enable verbose logging
-- `--flat-folder-structure` - Use flat folder structure
-- `--series-title-in-folder-structure` - Include series title in folder structure
-- `--variable-bit-rate` - Apply variable bit rate
-- `--aac-encoding-44-1` - Fix AAC encoding for 44.1 kHz
+- `--flat-folder-structure` - Use a flat output folder structure
+- `--series-title-in-folder-structure` - Include the series title in the folder structure
 - `--use-named-chapters` - Use named chapters if available
-- `--skip-short-chapters-duration <seconds>` - Skip short chapters between book parts
-- `--skip-very-short-chapter-duration <seconds>` - Skip very short chapters at begin and end
 
 ## Library Usage
 
@@ -80,10 +79,10 @@ import { convertAAX } from 'aax'
 async function convertBook() {
   const result = await convertAAX({
     inputFile: '/path/to/audiobook.aax',
-    outputFormat: 'mp3',
+    outputFormat: 'm4b',
     outputDir: './converted',
     chaptersEnabled: true,
-    bitrate: 128,
+    // activationCode: '2c1eeb0a', // optional; auto-detected if omitted
   })
 
   if (result.success) {
@@ -102,36 +101,28 @@ You can create an `aax.config.ts` or `aax.config.js` file in your project root t
 ```typescript
 export default {
   verbose: true,
-  outputFormat: 'mp3',
+  outputFormat: 'm4b', // 'm4b' | 'm4a'
   outputDir: './my-audiobooks',
   chaptersEnabled: true,
-  bitrate: 192,
-  // Optional: manually set the activation code
-  // activationCode: '1a2b3c4d',
-  // Optional: specify a custom FFmpeg path
-  // ffmpegPath: '/usr/local/bin/ffmpeg',
-  // New options
+  // Optional: manually set the activation code (auto-detected if omitted)
+  // activationCode: '2c1eeb0a',
+
+  // Output folder/file structure
   flatFolderStructure: false,
   seriesTitleInFolderStructure: true,
   fullCaptionForBookFolder: false,
   partFolderPrefix: 'standard',
   sequenceNumberDigits: 2,
-  customSearchWords: [],
-  additionalPunctuation: '',
-  intermediateFileCopy: false,
-  aacEncoding44_1: false,
-  variableBitRate: false,
-  reduceBitRate: 'no',
-  fileType: 'm4a',
-  useISOLatin1: false,
-  extractCoverImage: true,
+
+  // Chapters & extras
   useNamedChapters: true,
-  skipShortChaptersDuration: 25,
-  skipVeryShortChapterDuration: 10,
   verifyChapterMarks: 'all',
   preferEmbeddedChapterTimes: true,
+  extractCoverImage: true,
 }
 ```
+
+> Note: because conversion is a lossless remux of the source audio, bitrate/transcoding options (`bitrate`, `variableBitRate`, `reduceBitRate`, `aacEncoding44_1`) do not change the output and are reserved for a future transcoding pipeline.
 
 ## Using the Audible CLI Integration
 

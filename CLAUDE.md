@@ -2,7 +2,7 @@
 
 ## About
 
-A TypeScript library and CLI tool for converting Audible AAX audiobooks to standard MP3, M4A, or M4B formats. It preserves chapter information, supports splitting audiobooks by chapters, and can automatically detect the Audible activation code via the Audible CLI integration. Requires `ffmpeg` and the `audible` CLI to be installed. Configuration is done via `aax.config.ts` with options for bitrate, folder structure, chapter handling, and encoding settings.
+A TypeScript library and CLI tool for converting Audible AAX audiobooks to M4B or M4A. Conversion is a lossless decrypt-and-remux of the original AAC stream (no transcoding), done entirely in TypeScript via `ts-videos` — `ffmpeg` is not required. It preserves chapter markers, metadata, and cover art, supports splitting audiobooks into one file per chapter, and can automatically detect the Audible activation code via the `audible` CLI integration (the CLI is optional; an activation code can also be passed directly). Configuration is done via `aax.config.ts` with options for output format, folder structure, and chapter handling.
 
 ## Linting
 

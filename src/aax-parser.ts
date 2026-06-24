@@ -68,6 +68,18 @@ async function readBoxHeader(reader: Reader): Promise<{ size: number, type: stri
  */
 export async function parseAaxFile(inputPath: string): Promise<AaxFileInfo> {
   const source = new FileSource(inputPath)
+  try {
+    return await parseAaxFromSource(source)
+  }
+  catch (error) {
+    // The source owns an open file handle; close it before propagating so a
+    // failed parse (invalid/corrupt file, or probing many files) doesn't leak fds.
+    await source.close?.()
+    throw error
+  }
+}
+
+async function parseAaxFromSource(source: Source): Promise<AaxFileInfo> {
   const reader = Reader.fromSource(source) as ReaderWithPosition
 
   // Read ftyp

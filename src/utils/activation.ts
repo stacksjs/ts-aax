@@ -155,9 +155,15 @@ export async function lookupActivationCodeByChecksum(checksum: string): Promise<
   if (!checksum) return null
 
   try {
-    const fixtureChecksums: Record<string, string> = {
-      '9e32e8db2e0619ff257680c769e91a7b8d96da03': '1CEB00DA', // Try a different known code for our test file
-    }
+    // The adrm checksum is SHA1(intermediate_key[0:16] + intermediate_iv[0:16]),
+    // which is derived solely from the activation bytes — so a checksum maps to
+    // exactly one activation code. A static table could short-circuit detection,
+    // but only with VERIFIED entries: a wrong mapping here would be cached as the
+    // file's activation code (via getActivationCodeForFile -> saveActivationCode)
+    // and silently break every later conversion. Known codes are already tried,
+    // and validated, in extractActivationFromFile, so leave this empty until an
+    // entry can be confirmed with validateActivationBytes.
+    const fixtureChecksums: Record<string, string> = {}
 
     const lowerChecksum = checksum.toLowerCase()
     if (fixtureChecksums[lowerChecksum]) {
