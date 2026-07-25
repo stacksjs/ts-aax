@@ -128,7 +128,7 @@ aax convert audiobook.aax -v
 If you're still experiencing issues:
 
 1. Check the [GitHub Issues](https://github.com/stacksjs/aax/issues)
-2. Join the [Discord Community](https://discord.gg/stacksjs)
+2. Join the [Discord Community](https://stacksjs.com/discord)
 3. Create a new issue with:
   - Error message
   - Verbose output
