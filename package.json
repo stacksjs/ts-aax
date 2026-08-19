@@ -1,7 +1,7 @@
 {
   "name": "@stacksjs/aax",
   "type": "module",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A tool to convert AAX files to other formats",
   "author": "Chris Breuer <chris@stacksjs.org>",
   "license": "MIT",
