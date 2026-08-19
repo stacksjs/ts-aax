@@ -1,7 +1,7 @@
-import type { BunPressConfig } from 'bunpress'
+import type { BunPressConfig } from '@stacksjs/bunpress'
 
 const config: BunPressConfig = {
-  name: 'AAX Audio Converter',
+  title: 'AAX Audio Converter',
   description: 'A TypeScript library and CLI tool for converting Audible AAX audiobooks to standard MP3, M4A, or M4B formats',
   url: 'https://aax.sh',
 
