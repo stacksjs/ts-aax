@@ -17,3 +17,4 @@ bin/aax
 bin/aax*
 /pantry
 /.audible-libs
+/aaxs

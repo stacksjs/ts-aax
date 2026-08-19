@@ -74,7 +74,6 @@
     "format:fix": "bunx --bun pickier . --format --write"
   },
   "dependencies": {
-    "@stacksjs/clapp": "^0.2.0",
     "ts-videos": "github:stacksjs/ts-videos",
     "@ts-videos/mp4": "github:stacksjs/ts-videos"
   },

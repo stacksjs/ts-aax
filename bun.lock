@@ -5,7 +5,6 @@
     "": {
       "name": "@stacksjs/aax",
       "dependencies": {
-        "@stacksjs/clapp": "^0.2.0",
         "@ts-videos/mp4": "github:stacksjs/ts-videos",
         "ts-videos": "github:stacksjs/ts-videos",
       },
