@@ -1,4 +1,5 @@
 import type { ConversionOptions, ConversionResult } from './types'
+import type { AaxFileInfo } from './aax-parser'
 import { existsSync, mkdirSync } from 'node:fs'
 import path from 'node:path'
 import { FileTarget } from 'ts-videos/target'
@@ -9,7 +10,7 @@ import { decryptSample, deriveKeys, parseActivationBytes, validateActivationByte
 import { config } from './config'
 import { getActivationBytesFromAudibleCli } from './utils/activation'
 import { logger, reportError } from './utils/logger'
-import { getBookMetadata } from './utils/metadata'
+import { remuxAax } from './aax-remuxer'
 
 /** Sanitize a string for use as a filename or directory name on macOS/Windows/Linux */
 function sanitizeName(_input: string): string {
@@ -131,10 +132,11 @@ export async function convertAAX(options: ConversionOptions): Promise<Conversion
 
   logger.info(`Using activation code: ${activationCode.substring(0, 2)}******`)
 
+  let aaxInfo: AaxFileInfo | undefined
   try {
     // Parse the AAX file
     logger.info('Parsing AAX file structure...')
-    const aaxInfo = await parseAaxFile(options.inputFile)
+    aaxInfo = await parseAaxFile(options.inputFile)
 
     // Log book info from parsed metadata
     const metadata = aaxInfo.metadata
@@ -193,108 +195,24 @@ export async function convertAAX(options: ConversionOptions): Promise<Conversion
     logger.info(`Output path: ${shortPath}`)
     logger.debug(`Full output path: ${outputPath}`)
 
-    // Create output M4B using ts-videos Mp4Muxer
-    logger.info('Starting conversion...')
-    const target = new FileTarget(outputPath)
-    const muxer = new Mp4Muxer(target, {
-      fastStart: true, // moov-before-mdat for maximum compatibility
-      brand: 'M4B ',
-    })
-
-    // Add audio track with AAC config from the original file
-    const audioTrack = muxer.addAudioTrack({
-      codec: 'aac',
-      sampleRate: aaxInfo.sampleRate,
-      channels: aaxInfo.channelCount,
-      codecDescription: aaxInfo.esdsConfig,
-    })
-
-    // Set metadata for the output file
-    muxer.setMetadata({
-      title: metadata.title,
-      artist: metadata.author,
-      albumArtist: metadata.narrator,
-      album: metadata.title,
-      genre: 'Audiobook',
-      year: metadata.publishingYear ? Number(metadata.publishingYear) : undefined,
-      copyright: metadata.copyright,
-      narrator: metadata.narrator,
-      publisher: metadata.publisher,
-      description: metadata.description,
-    })
-
-    // Set cover art
-    if (metadata.coverImage) {
-      const isJpeg = metadata.coverImage[0] === 0xFF && metadata.coverImage[1] === 0xD8
-      muxer.setArtwork(metadata.coverImage, isJpeg ? 'jpeg' : 'png')
-    }
-
-    // Add chapters (unless explicitly disabled via chaptersEnabled)
-    const chaptersEnabled = options.chaptersEnabled ?? config.chaptersEnabled ?? true
-    if (chaptersEnabled) {
-      for (const chapter of aaxInfo.chapters) {
-        muxer.addChapter(chapter.title, chapter.startTime * 1000)
-      }
-    }
-
-    await muxer.start()
-
-    // Create a reader source to read encrypted samples
-    const reader = new Reader(aaxInfo.source) as Reader & { position: number }
-    const totalSamples = aaxInfo.samples.length
-    let processedSamples = 0
-    let timestamp = 0 // Running timestamp in seconds
-
-    // Set up progress bar
+    logger.info('Starting lossless conversion...')
     const progressBar = logger.progress(100, 'Decrypting and remuxing...')
-
-    for (const sample of aaxInfo.samples) {
-      // Read encrypted sample data from source
-      reader.position = sample.offset
-      const encrypted = await reader.readBytes(sample.size)
-      if (!encrypted) {
-        logger.warn(`Failed to read sample at offset ${sample.offset}, skipping`)
-        continue
-      }
-
-      // Decrypt the sample
-      const decrypted = decryptSample(encrypted, keys.fileKey, keys.fileIv)
-
-      // Calculate duration in seconds
-      const durationSec = sample.duration / aaxInfo.timescale
-
-      // Write decrypted sample to muxer
-      await muxer.writePacket(audioTrack.id, {
-        data: decrypted,
-        timestamp,
-        duration: durationSec,
-        isKeyframe: true,
-      })
-
-      timestamp += durationSec
-      processedSamples++
-
-      // Update progress
-      if (processedSamples % 1000 === 0 || processedSamples === totalSamples) {
-        const percent = Math.min(99, (processedSamples / totalSamples) * 100)
-        const timeStr = formatDuration(timestamp)
-        const totalStr = formatDuration(aaxInfo.duration / aaxInfo.timescale)
-        progressBar.update(percent, `Decrypting ${timeStr} / ${totalStr} (${processedSamples}/${totalSamples} samples)`)
-      }
-    }
-
-    // Finalize the muxer (writes moov + closes file)
-    await muxer.finalize()
-    await target.close?.()
-    await aaxInfo.source.close?.()
-
+    await remuxAax(
+      aaxInfo,
+      keys,
+      outputPath,
+      outputFormat,
+      options.chaptersEnabled ?? config.chaptersEnabled ?? true,
+      percent => progressBar.update(Math.min(99, percent), 'Decrypting and remuxing...'),
+    )
     progressBar.update(100, 'Conversion complete')
 
     // Extract cover image to a sidecar file if requested (falls back to config,
     // since the CLI does not pass this option through)
     const extractCoverImage = options.extractCoverImage ?? config.extractCoverImage
     if (extractCoverImage && metadata.coverImage) {
-      const coverPath = path.join(path.dirname(outputPath), 'cover.jpg')
+      const isJpeg = metadata.coverImage[0] === 0xFF && metadata.coverImage[1] === 0xD8
+      const coverPath = path.join(path.dirname(outputPath), isJpeg ? 'cover.jpg' : 'cover.png')
       try {
         const { writeFileSync } = await import('node:fs')
         writeFileSync(coverPath, metadata.coverImage)
@@ -322,6 +240,9 @@ export async function convertAAX(options: ConversionOptions): Promise<Conversion
       success: false,
       error: `Error during conversion: ${(error as Error).message}`,
     }
+  }
+  finally {
+    await aaxInfo?.source.close?.()
   }
 }
 

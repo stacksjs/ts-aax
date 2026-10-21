@@ -15,9 +15,9 @@ A TypeScript library and CLI tool for converting Audible AAX audiobooks to M4B o
 ## Features
 
 - Convert AAX files to M4B or M4A (lossless — the original AAC stream is preserved bit-for-bit)
-- Preserve chapter markers, embedded metadata, and cover art
+- Preserve original chapter tracks and exact timing, all embedded metadata (including custom tags), and every cover image
 - Automatically detect the Audible activation code (via the `audible` CLI, or by trying known codes)
-- Pure-TypeScript decryption + MP4 remux — no `ffmpeg` required
+- Pure-TypeScript decryption + MP4 remux with bounded audio buffers and atomic output writes — no `ffmpeg` required
 - Simple command-line interface
 
 ## Installation

@@ -143,7 +143,6 @@ async function parseAaxFromSource(source: Source): Promise<AaxFileInfo> {
   const metadata: BookMetadata = {
     title: tsMetadata.title,
     author: tsMetadata.artist,
-    narrator: tsMetadata.albumArtist,
     duration: parsed.duration / parsed.timescale,
     publisher: tsMetadata.publisher,
     copyright: tsMetadata.copyright,
