@@ -1,3 +1,22 @@
+[Compare changes](https://github.com/stacksjs/ts-aax/compare/v0.4.2...v0.4.3)
+
+## 🐛 Bug Fixes
+
+- preserve original audiobook metadata during lossless conversion ([a3c712d](https://github.com/stacksjs/ts-aax/commit/a3c712d)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **docs**: use the config keys bunpress actually has ([9c5e9a9](https://github.com/stacksjs/ts-aax/commit/9c5e9a9)) _(by Chris <chrisbreuer93@gmail.com>)_
+
+## 🧹 Chores
+
+- release v0.4.3 ([33041a6](https://github.com/stacksjs/ts-aax/commit/33041a6)) _(by Chris <chrisbreuer93@gmail.com>)_
+- add patch release script ([8cda272](https://github.com/stacksjs/ts-aax/commit/8cda272)) _(by Chris <chrisbreuer93@gmail.com>)_
+- run bun-git-hooks and @stacksjs/logsmith, not the unrelated npm 'git-hooks' and 'logsmith' ([14ed9ed](https://github.com/stacksjs/ts-aax/commit/14ed9ed)) _(by Chris <chrisbreuer93@gmail.com>)_
+- release through @stacksjs/bumpx, not the unrelated npm 'bumpx' ([4e6355d](https://github.com/stacksjs/ts-aax/commit/4e6355d)) _(by Chris <chrisbreuer93@gmail.com>)_
+- **deps**: update shivammathur/setup-php action to v2.37.1 [security] (#2020) ([94659d6](https://github.com/stacksjs/ts-aax/commit/94659d6)) _(by [renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>](https://github.com/renovate[bot]))_ ([#2020](https://github.com/stacksjs/ts-aax/issues/2020), [#2020](https://github.com/stacksjs/ts-aax/issues/2020))
+
+## Contributors
+
+- _Chris <chrisbreuer93@gmail.com>_
+- _[renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>](https://github.com/renovate[bot])_
 
 ## v0.4.0...main
 
